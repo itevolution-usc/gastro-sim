@@ -1,0 +1,18 @@
+classDiagram
+  direction LR
+  class RepositorioIntentos {
+    <<interface>>
+    +obtener(id) Intento
+    +guardar(intento)
+    +por_participante(seudonimo) list
+  }
+  class RepositorioIntentosPostgres {
+    -pool: AsyncConnectionPool
+  }
+  class RepositorioIntentosMemoria {
+    -datos: dict
+  }
+  class ServicioIntentos
+  RepositorioIntentos <|.. RepositorioIntentosPostgres
+  RepositorioIntentos <|.. RepositorioIntentosMemoria
+  ServicioIntentos --> RepositorioIntentos : inyectado con Depends()

@@ -1,0 +1,31 @@
+flowchart LR
+  subgraph L1["Capa de interfaz (routers FastAPI)"]
+    direction LR
+    R1["/auth · /me"]; R2["/casos"]; R3["/intentos"]; R4["/tutor"]; R5["/desempeno"]; R6["/docente · /admin"]
+  end
+  subgraph L2["Capa de servicios de aplicación (fachadas)"]
+    direction LR
+    S1["ServicioCuentas<br/><small>4.6</small>"]
+    S2["ServicioCasos<br/><small>4.2</small>"]
+    S3["ServicioIntentos<br/><small>4.5</small>"]
+    S4["ServicioTutor<br/><small>4.4</small>"]
+    S5["ServicioAlteraciones<br/><small>4.4</small>"]
+    S6["ServicioEvaluacion<br/><small>puntaje · insignias · tablero · 4.5</small>"]
+  end
+  subgraph L3["Capa de dominio"]
+    direction LR
+    D1["Caso · Intento (máquina de estados)"]
+    D2["Cadena de validadores de caso"]
+    D3["Estrategias de alteración"]
+    D4["Reglas de puntaje e insignias"]
+  end
+  subgraph L4["Capa de infraestructura (adaptadores)"]
+    direction LR
+    I1["Repositorios SQL"]
+    I2["ClienteLLM → AdaptadorGemini<br/><small>+ decorador de reintentos y respaldo</small>"]
+    I3["AdaptadorStorage"]
+    I4["VerificadorJWT (aal2)"]
+  end
+  L1 --> L2 --> L3
+  L2 --> L4
+  L3 -. "interfaces (puertos)" .-> L4

@@ -1,0 +1,26 @@
+classDiagram
+  direction LR
+  class ServicioAlteraciones {
+    -config: ConfigAlteracion
+    +decidir(intento) Recomendacion
+  }
+  class EstrategiaAlteracion {
+    <<interface>>
+    +aplicar(rec: Recomendacion, semilla) Recomendacion
+    +tipo() str
+  }
+  class ClaseIncorrecta { +aplicar(rec, semilla) }
+  class ConfianzaAlterada { +aplicar(rec, semilla) }
+  class RoiDesplazada { +aplicar(rec, semilla) }
+  class SinAlteracion { +aplicar(rec, semilla) }
+  class FabricaAlteraciones {
+    -registro: dict
+    +crear(tipo: str) EstrategiaAlteracion
+  }
+  ServicioAlteraciones --> EstrategiaAlteracion : usa
+  ServicioAlteraciones --> FabricaAlteraciones : pide estrategia
+  EstrategiaAlteracion <|.. ClaseIncorrecta
+  EstrategiaAlteracion <|.. ConfianzaAlterada
+  EstrategiaAlteracion <|.. RoiDesplazada
+  EstrategiaAlteracion <|.. SinAlteracion
+  FabricaAlteraciones ..> EstrategiaAlteracion : crea

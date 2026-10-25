@@ -1,0 +1,32 @@
+classDiagram
+  direction LR
+  class ClienteLLM {
+    <<interface>>
+    +generar(instrucciones, entrada, temperatura) str
+  }
+  class AdaptadorGemini {
+    -cliente: genai.Client
+    -modelo: str
+    +generar(...) str
+  }
+  class AdaptadorSimulado {
+    +generar(...) str
+  }
+  class ReintentoConRespaldo {
+    -envuelto: ClienteLLM
+    -respaldos: list~ClienteLLM~
+    -max_reintentos: int
+    +generar(...) str
+  }
+  class ServicioTutor
+  class ServicioCasos
+  ClienteLLM <|.. AdaptadorGemini
+  ClienteLLM <|.. AdaptadorSimulado
+  ClienteLLM <|.. ReintentoConRespaldo
+  ReintentoConRespaldo o--> ClienteLLM : envuelve
+  ServicioTutor --> ClienteLLM
+  ServicioCasos --> ClienteLLM
+  AdaptadorGemini ..> genai_Client : traduce llamadas
+  class genai_Client["google.genai.Client"] {
+    +interactions.create(model, input, system_instruction, generation_config)
+  }

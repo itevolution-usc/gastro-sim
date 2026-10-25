@@ -1,0 +1,29 @@
+flowchart TB
+  subgraph C1["Capa de presentación · navegador del usuario"]
+    direction LR
+    UI["SPA React + TypeScript<br/><small>pantallas, formularios, tableros</small>"]
+    M3D["Motor 3D<br/><small>Three.js + React Three Fiber</small>"]
+    AC["Cliente de autenticación<br/><small>supabase-js · sesión y MFA</small>"]
+  end
+  subgraph C2["Capa de lógica de negocio · servidor de aplicaciones"]
+    direction LR
+    API["API REST FastAPI<br/><small>validación JWT (aal2), rutas por módulo</small>"]
+    SV["Servicios de dominio<br/><small>casos · intentos · tutor · alteraciones · evaluación</small>"]
+    AD["Adaptadores<br/><small>LLM · almacenamiento · repositorios</small>"]
+  end
+  subgraph C3["Capa de datos y servicios"]
+    direction LR
+    PG[("PostgreSQL<br/>Supabase")]
+    ST[("Storage<br/><small>imágenes y modelos 3D</small>")]
+    AU["Supabase Auth<br/><small>contraseñas con hash · TOTP</small>"]
+    GM["API de Gemini"]
+  end
+  UI --- M3D
+  UI -- "HTTPS · JSON · Bearer JWT" --> API
+  AC -- "HTTPS" --> AU
+  M3D -- "GET recursos .glb / imágenes (URL firmada)" --> ST
+  API --> SV --> AD
+  AD -- "SQL (pool)" --> PG
+  AD -- "URL firmadas" --> ST
+  AD -- "HTTPS" --> GM
+  API -- "verifica firma del token" --> AU

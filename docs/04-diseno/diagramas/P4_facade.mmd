@@ -1,0 +1,20 @@
+classDiagram
+  direction TB
+  class RouterCasos { +POST /casos }
+  class ServicioCasos {
+    +generar(usuario, dificultad, region) CasoPublico
+    +repetir(usuario, caso_id) CasoPublico
+  }
+  class RepositorioImagenes { +seleccionar(dificultad, region, excluir) }
+  class TablaUbicaciones { +ubicar(clase) Ubicacion3D }
+  class ClienteLLM { +generar() }
+  class ValidadorCaso { +validar() }
+  class RepositorioCasos { +guardar(caso) }
+  class AdaptadorStorage { +url_firmada(ruta) }
+  RouterCasos --> ServicioCasos : una sola llamada
+  ServicioCasos --> RepositorioImagenes
+  ServicioCasos --> TablaUbicaciones
+  ServicioCasos --> ClienteLLM
+  ServicioCasos --> ValidadorCaso
+  ServicioCasos --> RepositorioCasos
+  ServicioCasos --> AdaptadorStorage

@@ -1,0 +1,27 @@
+flowchart TB
+  subgraph V["Vista (componentes React)"]
+    direction TB
+    P1["Páginas: Login, Activar2FA, Inicio,<br/>Simulador, PanelCaso, Retro, Tablero, Docente"]
+    P2["Escena3D (R3F): Tracto, Endoscopio,<br/>Hitos, Hallazgo, Minimapa"]
+  end
+  subgraph VM["Modelo de vista (hooks + stores Zustand)"]
+    direction TB
+    H1["useSesion · useCaso · useIntento"]
+    H2["useEndoscopio · useTelemetria"]
+    H3["useTutor · useDocente"]
+  end
+  subgraph M["Modelo (servicios y datos)"]
+    direction TB
+    A1["clienteApi (fetch + JWT)"]
+    A2["supabase-js (Auth)"]
+    A3["Tipos TypeScript del contrato API"]
+  end
+  P1 -- "eventos de usuario" --> H1
+  P2 -- "colisiones, cámara" --> H2
+  H1 -- "estado observable" --> P1
+  H2 --> P2
+  H3 --> P1
+  H1 --> A1
+  H2 -- "lotes de eventos" --> A1
+  H3 --> A1
+  H1 --> A2

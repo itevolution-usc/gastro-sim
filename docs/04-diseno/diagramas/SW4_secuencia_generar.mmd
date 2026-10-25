@@ -1,0 +1,30 @@
+sequenceDiagram
+  autonumber
+  actor E as Estudiante
+  participant W as SPA React
+  participant A as API /casos
+  participant S as ServicioCasos (fachada)
+  participant R as Repositorios
+  participant L as ClienteLLM (Gemini)
+  participant V as Cadena de validadores
+  E->>W: Solicita caso (dificultad, región)
+  W->>A: POST /casos {dificultad, region}
+  A->>S: generar(usuario, dificultad, region)
+  S->>R: seleccionar imagen aprobada no usada
+  R-->>S: imagen + clase + predicción
+  S->>R: ubicación 3D según clase (tabla de correspondencia)
+  S->>L: redactar historia (instrucciones v1.x, semilla)
+  alt modelo principal saturado (503)
+    L->>L: reintento con espera + modelo de respaldo
+  end
+  L-->>S: historia clínica (JSON)
+  S->>V: validar(caso)
+  alt caso inválido
+    V-->>S: rechazo y motivo
+    S->>L: regenerar (máx. 2 intentos)
+  end
+  V-->>S: caso válido
+  S->>R: guardar caso (modelo, versión, semilla, estado=pendiente)
+  S-->>A: caso SIN respuesta de referencia
+  A-->>W: 201 {caso, escena, ubicación}
+  W-->>E: Carga la escena 3D
