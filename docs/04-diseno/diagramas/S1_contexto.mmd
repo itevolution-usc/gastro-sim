@@ -1,0 +1,18 @@
+flowchart LR
+  E["👩‍🎓 Estudiante<br/><small>explora casos 3D y decide</small>"]
+  DO["👨‍🏫 Docente / Administrador<br/><small>revisa casos, configura errores, exporta</small>"]
+  V["🩺 Validador clínico<br/><small>revisa muestras de casos</small>"]
+  subgraph SYS[" "]
+    G["<b>GASTRO-SIM</b><br/>Simulador web 3D de decisiones humano–IA<br/>en endoscopia digestiva alta"]
+  end
+  LLM["Servicio de modelo de lenguaje<br/><small>API de Gemini</small>"]
+  AUTH["Aplicación autenticadora<br/><small>TOTP en el teléfono</small>"]
+  DS["Dataset HyperKvasir<br/><small>tracto superior · CC BY 4.0</small>"]
+  E -- "HTTPS / navegador WebGL 2" --> G
+  DO -- "HTTPS" --> G
+  V -. "revisión de muestras" .-> G
+  G -- "historias clínicas y tutor<br/>(solo datos sintéticos)" --> LLM
+  E -. "código de 6 dígitos" .- AUTH
+  DS -- "carga inicial de imágenes<br/>y predicciones (offline)" --> G
+  style G fill:#1F3A5F,color:#fff,stroke:#1F3A5F
+  style SYS fill:#fff,stroke:#1F3A5F,stroke-dasharray:4

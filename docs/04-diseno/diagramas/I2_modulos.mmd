@@ -1,0 +1,14 @@
+flowchart TB
+  M6["<b>M6 Plataforma e integración</b><br/><small>EDT 4.6 · cuentas, 2FA, roles, aviso</small>"]
+  M2["<b>M2 Generador de casos con IA</b><br/><small>EDT 4.2</small>"]
+  M1["<b>M1 Simulador 3D</b><br/><small>EDT 4.1</small>"]
+  M3["<b>M3 Componente de IA de visión</b><br/><small>EDT 4.3 · predicciones precalculadas</small>"]
+  M4["<b>M4 Tutor e inyección de errores</b><br/><small>EDT 4.4</small>"]
+  M5["<b>M5 Evaluación, gamificación y registro</b><br/><small>EDT 4.5</small>"]
+  M6 --> M2 & M5
+  M2 -- "caso + ubicación 3D" --> M1
+  M3 -- "clase, confianza, ROI" --> M2
+  M3 -- "recomendación original" --> M4
+  M1 -- "eventos y captura" --> M5
+  M4 -- "recomendación mostrada, mensajes" --> M5
+  M2 -- "historia clínica" --> M4

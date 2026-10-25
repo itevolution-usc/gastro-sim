@@ -1,0 +1,31 @@
+flowchart LR
+  subgraph REC["1 · Recopilación"]
+    direction TB
+    HK["Dataset HyperKvasir<br/><small>imágenes tracto superior</small>"]
+    U["Interacción del usuario<br/><small>registro, escena 3D, decisiones</small>"]
+  end
+  subgraph TRA["2 · Transformación"]
+    direction TB
+    CO["Colab: modelo de visión<br/><small>predicción, ROI, Grad-CAM</small>"]
+    LLM["Agente generador<br/><small>historia clínica sintética</small>"]
+    VAL["Validadores y reglas<br/><small>alteración, puntaje</small>"]
+  end
+  subgraph ALM["3 · Almacenamiento"]
+    direction TB
+    PUB[("Esquema public<br/><small>cuentas · contenido · casos</small>")]
+    INV[("Esquema investigacion<br/><small>intentos · telemetría · tutor</small>")]
+    STO[("Storage<br/><small>imágenes · .glb · Grad-CAM</small>")]
+  end
+  subgraph CON["4 · Distribución y consumo"]
+    direction TB
+    TAB["Tablero y clasificación"]
+    DOC["Revisión docente"]
+    CSV["Exportación CSV<br/><small>seudonimizada</small>"]
+  end
+  HK --> CO --> PUB
+  HK --> STO
+  PUB --> LLM --> VAL --> PUB
+  U --> VAL --> INV
+  INV --> TAB
+  PUB --> DOC
+  INV --> CSV

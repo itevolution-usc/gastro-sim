@@ -1,0 +1,170 @@
+erDiagram
+  grupo {
+    uuid id PK
+    text nombre
+    text periodo
+    uuid docente_id FK
+  }
+  perfil {
+    uuid id PK "= auth.users.id"
+    text nombre_visible
+    rol_t rol
+    uuid grupo_id FK
+    uuid seudonimo UK
+    timestamptz aviso_aceptado_en
+    text version_aviso
+    bool mfa_activado
+    int puntos
+    smallint nivel
+  }
+  codigo_recuperacion {
+    uuid id PK
+    uuid perfil_id FK
+    text codigo_hash
+    timestamptz usado_en
+  }
+  auditoria_cuenta {
+    bigint id PK
+    uuid actor_id FK
+    uuid afectado_id FK
+    text accion
+    jsonb detalle
+  }
+  insignia {
+    smallint id PK
+    text codigo UK
+    text nombre
+    jsonb criterio
+  }
+  perfil_insignia {
+    uuid perfil_id PK,FK
+    smallint insignia_id PK,FK
+    timestamptz obtenida_en
+  }
+  clase_hallazgo {
+    smallint id PK
+    text codigo UK
+    text nombre_es
+    region_t region
+    bool es_patologico
+  }
+  hito_anatomico {
+    smallint id PK
+    text codigo UK
+    region_t region
+    smallint orden
+  }
+  ubicacion_3d {
+    int id PK
+    smallint clase_id FK
+    smallint hito_id FK
+    real x
+    real y
+    real z
+  }
+  imagen {
+    int id PK
+    text archivo_origen UK
+    text ruta_storage
+    smallint clase_id FK
+    dificultad_t dificultad
+    text licencia
+  }
+  prediccion {
+    int id PK
+    int imagen_id FK
+    text version_modelo
+    smallint clase_predicha_id FK
+    numeric confianza
+    real roi_x
+    real roi_y
+    real roi_w
+    real roi_h
+    text ruta_gradcam
+  }
+  caso {
+    uuid id PK
+    int imagen_id FK
+    int ubicacion_id FK
+    dificultad_t dificultad
+    jsonb historia
+    smallint referencia_id FK
+    text modelo_llm
+    text version_prompt
+    int semilla
+    estado_caso_t estado
+    text motivo_descarte
+    uuid revisado_por FK
+  }
+  reporte_caso {
+    int id PK
+    uuid caso_id FK
+    uuid perfil_id FK
+    text comentario
+    text estado
+  }
+  generacion_fallida {
+    bigint id PK
+    uuid perfil_id FK
+    dificultad_t dificultad
+    region_t region
+    smallint intentos
+    jsonb motivos
+  }
+  config_alteracion {
+    int id PK
+    uuid grupo_id FK
+    numeric porcentaje
+    text_arr tipos
+    timestamptz vigente_desde
+  }
+  intento {
+    uuid id PK
+    uuid participante FK "perfil.seudonimo"
+    uuid caso_id FK
+    int config_id FK
+    estado_intento_t estado
+    smallint decision_inicial_id FK
+    smallint confianza_inicial
+    bool alterada
+    text tipo_alteracion
+    jsonb recomendacion_mostrada
+    smallint decision_final_id FK
+    smallint confianza_final
+    bool acierto_usuario
+    bool acierto_ia
+    int puntaje
+  }
+  evento_telemetria {
+    bigint id PK
+    uuid intento_id FK
+    text tipo
+    jsonb datos
+    timestamptz ocurrido_en
+  }
+  mensaje_tutor {
+    bigint id PK
+    uuid intento_id FK
+    text emisor
+    text contenido
+    int latencia_ms
+    bool es_respaldo
+  }
+  grupo ||--o{ perfil : ""
+  perfil ||--o{ codigo_recuperacion : ""
+  perfil ||--o{ auditoria_cuenta : ""
+  perfil ||--o{ perfil_insignia : ""
+  insignia ||--o{ perfil_insignia : ""
+  clase_hallazgo ||--o{ imagen : ""
+  clase_hallazgo ||--o{ ubicacion_3d : ""
+  hito_anatomico ||--o{ ubicacion_3d : ""
+  imagen ||--o{ prediccion : ""
+  imagen ||--o{ caso : ""
+  ubicacion_3d ||--o{ caso : ""
+  caso ||--o{ reporte_caso : ""
+  perfil ||--o{ generacion_fallida : ""
+  caso ||--o{ intento : ""
+  config_alteracion ||--o{ intento : ""
+  perfil ||--o{ intento : ""
+  intento ||--o{ evento_telemetria : ""
+  intento ||--o{ mensaje_tutor : ""

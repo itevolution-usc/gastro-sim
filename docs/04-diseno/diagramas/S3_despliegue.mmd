@@ -1,0 +1,32 @@
+flowchart LR
+  subgraph PC["«dispositivo» PC del usuario"]
+    BR["«entorno» Navegador Chrome / Firefox / Edge<br/>WebGL 2"]
+  end
+  subgraph CLOUD["«nube» Servicio de contenedores (opción base: Render)"]
+    subgraph FE["«contenedor Docker» gastro-web"]
+      NG["Nginx<br/><small>sirve el build estático de React</small>"]
+    end
+    subgraph BE["«contenedor Docker» gastro-api"]
+      UV["Uvicorn + FastAPI<br/><small>Python 3.12</small>"]
+    end
+  end
+  subgraph SB["«nube» Supabase (proyecto gastro-sim)"]
+    AUTH["Auth (MFA TOTP)"]
+    DB[("PostgreSQL 15")]
+    STO[("Storage<br/>buckets: imagenes · escenas · gradcam")]
+  end
+  subgraph GG["«nube» Google AI"]
+    GEM["API de Gemini<br/><small>modelo principal + respaldo</small>"]
+  end
+  subgraph LAB["«entorno offline» Google Colab (GPU)"]
+    NB["Cuaderno de entrenamiento<br/><small>modelo de visión · semilla fija</small>"]
+  end
+  BR -- "HTTPS 443" --> NG
+  BR -- "HTTPS 443 · REST/JSON" --> UV
+  BR -- "HTTPS · login y MFA" --> AUTH
+  BR -- "HTTPS · URL firmadas" --> STO
+  UV -- "TLS 5432/6543" --> DB
+  UV -- "HTTPS" --> STO
+  UV -- "HTTPS · clave en variable de entorno" --> GEM
+  NB -- "script de carga: predicciones,<br/>ROI y Grad-CAM" --> DB
+  NB --> STO

@@ -1,0 +1,24 @@
+classDiagram
+  direction LR
+  class Intento {
+    -estado: EstadoIntento
+    +registrar_decision_inicial(d, conf)
+    +obtener_recomendacion()
+    +registrar_decision_final(d, conf)
+    +cambiar_a(estado)
+  }
+  class EstadoIntento {
+    <<abstract>>
+    +registrar_decision_inicial(i, d, conf)
+    +obtener_recomendacion(i)
+    +registrar_decision_final(i, d, conf)
+  }
+  class Explorando
+  class DecisionInicial
+  class Recomendacion
+  class Finalizado
+  Intento o--> EstadoIntento : estado actual
+  EstadoIntento <|-- Explorando
+  EstadoIntento <|-- DecisionInicial
+  EstadoIntento <|-- Recomendacion
+  EstadoIntento <|-- Finalizado

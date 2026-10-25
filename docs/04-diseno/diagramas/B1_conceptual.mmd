@@ -1,0 +1,20 @@
+erDiagram
+  GRUPO ||--o{ PERFIL : agrupa
+  PERFIL ||--o{ GRUPO : "dirige (docente)"
+  PERFIL ||--|{ CODIGO_RECUPERACION : posee
+  PERFIL ||--o{ AUDITORIA_CUENTA : "actúa / es afectado"
+  PERFIL }o--o{ INSIGNIA : obtiene
+  CLASE_HALLAZGO ||--o{ IMAGEN : etiqueta
+  IMAGEN ||--o{ PREDICCION : recibe
+  CLASE_HALLAZGO ||--o{ UBICACION_3D : "se ubica en"
+  HITO_ANATOMICO ||--o{ UBICACION_3D : referencia
+  IMAGEN ||--o{ CASO : "se usa en"
+  UBICACION_3D ||--o{ CASO : posiciona
+  CASO ||--o{ REPORTE_CASO : recibe
+  PERFIL ||--o{ GENERACION_FALLIDA : origina
+  PERFIL ||--o{ REPORTE_CASO : reporta
+  CONFIG_ALTERACION ||--o{ INTENTO : rige
+  PERFIL ||--o{ INTENTO : "participa (seudónimo)"
+  CASO ||--o{ INTENTO : "se resuelve en"
+  INTENTO ||--o{ EVENTO_TELEMETRIA : genera
+  INTENTO ||--o{ MENSAJE_TUTOR : contiene

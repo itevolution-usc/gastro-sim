@@ -1,0 +1,52 @@
+flowchart LR
+  subgraph ING["Ingreso (todos)"]
+    direction TB
+    L["W01 Inicio de sesión"]
+    CC["W02 Crear cuenta"]
+    F["W04 Código 2FA"]
+    RC["W05 Código de recuperación"]
+    A["W03 Activar 2FA y aviso"]
+  end
+  subgraph EST["Estudiante"]
+    direction TB
+    H["W06 Inicio"]
+    G["W07 Generando caso"]
+    GE["W08 Error al generar"]
+    S["W09 Simulador 3D"]
+    P["W10 Decisión inicial"]
+    R["W11 Recomendación,<br/>tutor y decisión final"]
+    R2["W12 Mapa de calor"]
+    R3["W13 Tutor no disponible"]
+    RT["W14 Retroalimentación"]
+    RP["W15 Reportar caso"]
+    T["W16 Tablero"]
+    M["W17 Menú · cerrar sesión"]
+  end
+  subgraph DOC["Docente / administrador"]
+    direction TB
+    DC["W18 Revisión de casos"]
+    CF["W19 Configuración y exportación"]
+    U["W20 Usuarios y roles<br/><small>solo administrador</small>"]
+    U2["W21 Restablecer 2FA"]
+  end
+  L <--> CC
+  CC --> A
+  L --> F
+  F <--> RC
+  L -. "primer ingreso o 2FA restablecido" .-> A
+  A --> H
+  F -->|estudiante| H
+  RC -. "código válido: nuevo 2FA" .-> A
+  F -->|docente / admin| DC
+  H --> G --> S
+  G -. "3 intentos fallidos" .-> GE --> H
+  H -->|Repetir| S
+  S -->|captura| P --> R --> RT --> H
+  R <--> R2
+  R -.-> R3
+  RT --> RP
+  H --> T
+  H --> M -->|cerrar sesión| L
+  DC <--> CF
+  CF <--> U
+  U --> U2
