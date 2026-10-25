@@ -39,7 +39,7 @@ El sistema registra cada intento para medir la precisión de las decisiones, la 
 
 | Qué revisar | Dónde | Qué muestra |
 |---|---|---|
-| **Tablero del proyecto** | [GitHub Projects](PROYECTO_URL) | Las 78 actividades del cronograma en vistas de cronograma, tablero, ciclo TSP y responsable |
+| **Tablero del proyecto** | [GitHub Projects](https://github.com/orgs/itevolution-usc/projects/1) | Las 78 actividades del cronograma en vistas de cronograma, tablero, ciclo TSP y responsable |
 | **Hitos** | [Milestones](https://github.com/itevolution-usc/gastro-sim/milestones?state=all) | Los 13 hitos de la Lista de Hitos con su fecha, evidencia y avance |
 | **Actividades** | [Issues](https://github.com/itevolution-usc/gastro-sim/issues?q=is%3Aissue) | Una por actividad: paquete de la EDT, requisito, criterios de aceptación, responsable, fechas y evidencia |
 | **Control de cambios** | [Pull requests](https://github.com/itevolution-usc/gastro-sim/pulls?q=is%3Apr) | Cada cambio entra revisado por otro integrante |
