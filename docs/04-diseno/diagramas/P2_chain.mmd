@@ -1,0 +1,20 @@
+classDiagram
+  direction LR
+  class ValidadorCaso {
+    <<abstract>>
+    -siguiente: ValidadorCaso
+    +enlazar(v) ValidadorCaso
+    +validar(caso) Resultado
+    #revisar(caso)* Resultado
+  }
+  class CamposCompletos { #revisar(caso) }
+  class CoherenciaEtiquetaRegion { #revisar(caso) }
+  class SinRespuestaEnHistoria { #revisar(caso) }
+  class TerminosProhibidos { #revisar(caso) }
+  class ServicioCasos { +generar() }
+  ValidadorCaso <|-- CamposCompletos
+  ValidadorCaso <|-- CoherenciaEtiquetaRegion
+  ValidadorCaso <|-- SinRespuestaEnHistoria
+  ValidadorCaso <|-- TerminosProhibidos
+  ValidadorCaso o--> ValidadorCaso : siguiente
+  ServicioCasos --> ValidadorCaso : primer eslabón

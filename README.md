@@ -35,14 +35,31 @@ El sistema registra cada intento para medir la precisión de las decisiones, la 
 - **Desarrollo del software:** TSP (Team Software Process), en tres ciclos.
 - **Requisitos:** ISO/IEC/IEEE 29148, priorizados con MoSCoW.
 
+## Gestión del proyecto (para la revisión del docente)
+
+| Qué revisar | Dónde | Qué muestra |
+|---|---|---|
+| **Tablero del proyecto** | [GitHub Projects](PROYECTO_URL) | Las 78 actividades del cronograma en vistas de cronograma, tablero, ciclo TSP y responsable |
+| **Hitos** | [Milestones](https://github.com/itevolution-usc/gastro-sim/milestones?state=all) | Los 13 hitos de la Lista de Hitos con su fecha, evidencia y avance |
+| **Actividades** | [Issues](https://github.com/itevolution-usc/gastro-sim/issues?q=is%3Aissue) | Una por actividad: paquete de la EDT, requisito, criterios de aceptación, responsable, fechas y evidencia |
+| **Control de cambios** | [Pull requests](https://github.com/itevolution-usc/gastro-sim/pulls?q=is%3Apr) | Cada cambio entra revisado por otro integrante |
+
+**Trazabilidad:** requisito (Matriz v1.3) → paquete de la EDT → actividad (issue) → hito (milestone) → evidencia (documento en `docs/`).
+
+### Estado al 25/10/2026
+
+- ✅ Hitos cumplidos: H01 a H05 (inicio, requisitos, línea base, plan de calidad) y H07 (diseño del software).
+- 🔄 En curso: construcción del ciclo TSP 1 (plataforma con 2FA, generador de casos, modelo de visión) y prototipo técnico 3D.
+- ⚠️ H08 (v0.5, 25/10) no se alcanzó en la fecha: la construcción está atrasada respecto a la línea base. Se gestiona con el riesgo R11 (capacidad del equipo) y se presentará una solicitud de cambio al cronograma al Propietario del Proyecto.
+
 ## Documentación
 
 | Carpeta | Contenido |
 |---|---|
 | [`docs/01-inicio`](docs/01-inicio) | Acta de Constitución |
 | [`docs/02-requisitos`](docs/02-requisitos) | Matriz de trazabilidad, priorización MoSCoW, diagrama de casos de uso, SRS (ISO 29148) y caso de uso general |
-| [`docs/03-planeacion`](docs/03-planeacion) | Planes de alcance, cronograma, calidad y dirección del proyecto; EDT; lista de actividades; lista de hitos; cronograma (Gantt) |
-| [`docs/04-diseno`](docs/04-diseno) | Arquitectura y diagramas UML (en elaboración) |
+| [`docs/03-planeacion`](docs/03-planeacion) | Planes de alcance, cronograma, calidad y dirección del proyecto; EDT; lista de actividades; lista de hitos; cronograma (Gantt y GanttProject) |
+| [`docs/04-diseno`](docs/04-diseno) | Arquitectura del sistema y del software, justificación (ADR), patrones de diseño, base de datos (con script SQL) e interfaz (wireframes W01–W21) |
 
 ## Versiones
 

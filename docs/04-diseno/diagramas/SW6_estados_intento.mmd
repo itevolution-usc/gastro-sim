@@ -1,0 +1,17 @@
+stateDiagram-v2
+  [*] --> Explorando : POST /intentos
+  Explorando --> HallazgoCapturado : captura válida (RF-03.5)
+  HallazgoCapturado --> DecisionInicial : abre panel del caso
+  DecisionInicial --> Recomendacion : registra decisión + confianza (RF-05)
+  Recomendacion --> Recomendacion : consulta al tutor (RF-07)
+  Recomendacion --> Finalizado : decisión final (RF-09)
+  Finalizado --> [*] : retroalimentación y puntaje (RF-10, RF-11)
+  Explorando --> Abandonado : 30 min sin actividad
+  DecisionInicial --> Abandonado : 30 min sin actividad
+  Abandonado --> [*]
+  note right of Recomendacion
+    Solo en este estado se entrega
+    la recomendación de la IA.
+    La referencia nunca sale antes
+    de Finalizado.
+  end note

@@ -1,0 +1,24 @@
+flowchart LR
+  subgraph REPO["Repositorio gastro-sim"]
+    direction TB
+    subgraph WEBP["web/  (React + TS)"]
+      direction TB
+      w1["src/paginas"]; w2["src/escena3d"]; w3["src/estado"]; w4["src/api"]; w5["public/escenas/*.glb"]
+    end
+    subgraph APIP["api/  (FastAPI)"]
+      direction TB
+      a1["app/routers"]; a2["app/servicios"]; a3["app/dominio"]; a4["app/infraestructura"]; a5["app/prompts (versionados)"]; a6["tests/"]
+    end
+    subgraph DBP["db/"]
+      direction TB
+      d1["migraciones/*.sql"]; d2["semillas/*.sql"]
+    end
+    subgraph MLP["ml/"]
+      direction TB
+      m1["entrenamiento.ipynb"]; m2["cargar_predicciones.py"]
+    end
+    DOC["docs/"]; DCK["docker-compose.yml · .env.example"]
+  end
+  w4 -. "contrato OpenAPI" .-> a1
+  a4 -. "esquema" .-> d1
+  m2 -. "inserta en" .-> d1

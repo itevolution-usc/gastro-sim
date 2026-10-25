@@ -1,0 +1,23 @@
+classDiagram
+  direction LR
+  class BusEscena {
+    -suscriptores: Map~tipo, lista~
+    +suscribir(tipo, fn) cancelar
+    +emitir(evento)
+  }
+  class EventoEscena {
+    +tipo: hito_visitado | hallazgo_capturado | hallazgo_omitido
+    +datos: object
+    +t: number
+  }
+  class Endoscopio { +onColision() emite }
+  class Hallazgo { +onCaptura() emite }
+  class Minimapa { +actualizar(evento) }
+  class ListaHitos { +marcar(evento) }
+  class TelemetriaBuffer { +agregar(evento) +enviarLote() }
+  Endoscopio --> BusEscena : emitir
+  Hallazgo --> BusEscena : emitir
+  BusEscena ..> EventoEscena
+  BusEscena --> Minimapa : notifica
+  BusEscena --> ListaHitos : notifica
+  BusEscena --> TelemetriaBuffer : notifica

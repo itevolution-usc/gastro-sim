@@ -1,0 +1,23 @@
+flowchart TB
+  E["Estudiante"]:::p
+  D["Docente / Admin"]:::p
+  subgraph GS["GASTRO-SIM"]
+    WEB["<b>Aplicación web (SPA)</b><br/>React · TypeScript · Vite<br/><small>vistas, estado, cliente API</small>"]
+    S3D["<b>Simulador 3D</b><br/>React Three Fiber · Three.js<br/><small>escena, endoscopio, hitos, minimapa</small>"]
+    API["<b>API de aplicación</b><br/>Python · FastAPI<br/><small>monolito modular en capas</small>"]
+    DB[("<b>Base de datos</b><br/>PostgreSQL (Supabase)<br/><small>esquemas public e investigacion</small>")]
+    ST[("<b>Almacenamiento de archivos</b><br/>Supabase Storage<br/><small>imágenes, .glb, Grad-CAM</small>")]
+  end
+  AU["Supabase Auth<br/><small>registro, sesión, TOTP</small>"]
+  LLM["API de Gemini"]
+  E --> WEB
+  D --> WEB
+  WEB <--> S3D
+  WEB -- "REST/JSON · JWT" --> API
+  WEB -- "inicio de sesión y MFA" --> AU
+  S3D -- "descarga recursos" --> ST
+  API -- "SQL" --> DB
+  API -- "firma URL" --> ST
+  API -- "generación de texto" --> LLM
+  API -- "valida JWT" --> AU
+  classDef p fill:#FFF8E5,stroke:#C9A227

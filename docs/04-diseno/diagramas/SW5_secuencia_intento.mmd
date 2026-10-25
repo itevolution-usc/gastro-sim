@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor E as Estudiante
+  participant W as SPA / Escena 3D
+  participant I as API /intentos
+  participant SI as ServicioIntentos
+  participant SA as ServicioAlteraciones
+  participant T as ServicioTutor
+  E->>W: Recorre el tracto y captura el hallazgo
+  W->>I: POST /intentos/{id}/eventos (lote: hitos, captura)
+  E->>W: Decisión inicial + confianza (1–5)
+  W->>I: POST /intentos/{id}/decision-inicial
+  I->>SI: registrar (estado → RECOMENDACION)
+  SI->>SA: ¿alterar? (porcentaje y tipos vigentes)
+  SA-->>SI: recomendación original o alterada (+ tipo)
+  SI-->>W: clase sugerida, % confianza, ROI
+  opt Consulta al tutor
+    E->>W: Pregunta
+    W->>I: POST /intentos/{id}/tutor
+    I->>T: responder(historia, decisión inicial, recomendación)
+    T-->>W: respuesta sin revelar la referencia
+  end
+  E->>W: Decisión final + confianza
+  W->>I: POST /intentos/{id}/decision-final
+  I->>SI: cerrar intento, calcular puntaje e insignias
+  SI-->>W: retroalimentación (referencia, aciertos, alteración revelada)
