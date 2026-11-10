@@ -2,9 +2,10 @@
 Punto de entrada de la API de GASTRO-SIM.
 Responsable: Diego Agudelo · Development Manager.
 
-Arquitectura: monolito modular en capas (ADR-01). En esta fase solo existe
-la capa de interfaz (routers) y la infraestructura (db). Cada fase siguiente
-agrega su router: cuentas (fase 2), casos (fase 3), intentos (fase 4)...
+Arquitectura: monolito modular en capas (ADR-01). Capa de interfaz (routers),
+seguridad (seguridad.py), adaptadores externos (auth_admin.py) e
+infraestructura (db). Cada fase agrega su router: salud (fase 1),
+cuentas (fase 2), casos (fase 3), intentos (fase 4)...
 """
 from contextlib import asynccontextmanager
 
@@ -14,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import obtener_configuracion
 from .db import abrir_pool, cerrar_pool
 from .errores import registrar_manejadores
-from .routers import salud
+from .routers import cuentas, salud
 
 
 @asynccontextmanager
@@ -42,6 +43,7 @@ def crear_app() -> FastAPI:
     )
     registrar_manejadores(app)
     app.include_router(salud.router)
+    app.include_router(cuentas.router)  # fase 2: perfil, aviso y 2FA
     return app
 
 
