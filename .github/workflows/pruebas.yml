@@ -1,0 +1,106 @@
+# ==============================================================
+# GASTRO-SIM · Integración continua (RNF-09)
+# Responsable: Nestor Velasco · Quality Manager (actividad 4611)
+#
+# En cada pull request y en cada cambio a main, GitHub levanta una
+# máquina limpia, crea la base de datos con las migraciones y corre
+# todas las pruebas. Si algo falla, el PR muestra una ❌ y no se fusiona.
+# ==============================================================
+name: Pruebas
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Si llega un commit nuevo al mismo PR, se cancela la ejecución anterior.
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Base de datos de prueba: misma versión que docker-compose.yml.
+    # Las credenciales son solo de esta máquina temporal (no son secretas).
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gastro
+          POSTGRES_PASSWORD: pruebas-ci
+          POSTGRES_DB: gastro_sim
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gastro -d gastro_sim"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://gastro:pruebas-ci@localhost:5432/gastro_sim
+      PGPASSWORD: pruebas-ci
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v5
+
+      - name: Crear el esquema (migraciones en orden)
+        run: |
+          for archivo in db/migraciones/*.sql; do
+            echo "Aplicando $archivo"
+            psql -v ON_ERROR_STOP=1 -h localhost -U gastro -d gastro_sim -f "$archivo"
+          done
+
+      - name: Instalar Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: api/requirements.txt
+
+      - name: Instalar dependencias
+        run: pip install -r api/requirements.txt
+
+      - name: Ejecutar las pruebas
+        working-directory: api
+        run: pytest -v
+
+  frontend:
+    name: Frontend (tipos y compilación)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v5
+
+      # El frontend llega en la fase 2 (Cristian). Mientras no exista, este
+      # trabajo termina en verde sin hacer nada.
+      - name: ¿Existe el frontend?
+        id: existe
+        run: |
+          if [ -f frontend/package.json ]; then echo "si=true" >> "$GITHUB_OUTPUT"; else echo "si=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Instalar Node.js 22
+        if: steps.existe.outputs.si == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias (exactas, según package-lock.json)
+        if: steps.existe.outputs.si == 'true'
+        working-directory: frontend
+        run: npm ci
+
+      - name: Revisar tipos, compilar y probar
+        if: steps.existe.outputs.si == 'true'
+        working-directory: frontend
+        run: |
+          npm run build
+          npm test
