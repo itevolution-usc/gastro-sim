@@ -1,0 +1,23 @@
+# Responsable: Nestor Velasco (actividad 4612)
+# Secretos y configuración local: nunca se suben al repositorio (RNF-07)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node (frontend, fase 2)
+node_modules/
+dist/
+
+# Archivos temporales de Office, sistema operativo y editores
+~$*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

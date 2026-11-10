@@ -1,0 +1,11 @@
+# Responsable: Nestor Velasco (actividad 4612)
+# Guarda todos los archivos de texto con saltos de línea de Linux (LF),
+# aunque se editen en Windows. Así Docker y PostgreSQL los leen bien.
+* text=auto eol=lf
+
+# Archivos binarios: Git no debe tocarlos.
+*.docx binary
+*.xlsx binary
+*.pdf binary
+*.png binary
+*.gan binary

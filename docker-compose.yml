@@ -1,0 +1,43 @@
+# ==============================================================
+# GASTRO-SIM · Orquestación local con un solo comando (RNF-10)
+# Responsable: Nestor Velasco (actividad 4612 · Empaquetar con Docker)
+# Uso:  docker compose up --build
+# ==============================================================
+services:
+
+  # Base de datos PostgreSQL local. En la nube se usará Supabase;
+  # aquí se replica el mismo esquema para desarrollar y probar sin internet.
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # Los .sql de esta carpeta se ejecutan en orden alfabético
+    # SOLO la primera vez que se crea el volumen de datos.
+    volumes:
+      - ./db/migraciones:/docker-entrypoint-initdb.d:ro
+      - datos_pg:/var/lib/postgresql/data
+    # Puerto 5433 en tu computador (por si ya tienes otro PostgreSQL en el 5432).
+    # Dentro de Docker la API se conecta por el 5432 interno.
+    ports:
+      - "5433:5432"
+    # La API no arranca hasta que la base de datos responda.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # API de aplicación (FastAPI). Lee la configuración del archivo .env
+  api:
+    build: ./api
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+volumes:
+  datos_pg:

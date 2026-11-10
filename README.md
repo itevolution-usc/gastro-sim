@@ -61,6 +61,75 @@ El sistema registra cada intento para medir la precisión de las decisiones, la 
 | [`docs/03-planeacion`](docs/03-planeacion) | Planes de alcance, cronograma, calidad y dirección del proyecto; EDT; lista de actividades; lista de hitos; cronograma (Gantt y GanttProject) |
 | [`docs/04-diseno`](docs/04-diseno) | Arquitectura del sistema y del software, justificación (ADR), patrones de diseño, base de datos (con script SQL) e interfaz (wireframes W01–W21) |
 
+## Cómo ejecutar el sistema (desarrollo local)
+
+Con **un solo comando** se levantan la base de datos (PostgreSQL 16) y la API (FastAPI, Python 3.12). No hace falta instalar Python ni PostgreSQL: Docker los trae.
+
+### Requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) abierto (en Windows, con WSL 2).
+- [Git](https://git-scm.com/) o [GitHub Desktop](https://desktop.github.com/).
+
+### Pasos
+
+1. Clonar el repositorio:
+
+   ```bash
+   git clone https://github.com/itevolution-usc/gastro-sim.git
+   cd gastro-sim
+   ```
+
+2. Crear el archivo de configuración local a partir de la plantilla y cambiar la contraseña en **las dos líneas** donde aparece (`POSTGRES_PASSWORD` y `DATABASE_URL`):
+
+   | Windows (PowerShell) | macOS / Linux |
+   |---|---|
+   | `Copy-Item .env.example .env` | `cp .env.example .env` |
+
+   > El archivo `.env` es personal y Git lo ignora: **nunca se sube** al repositorio.
+
+3. Construir y levantar el sistema:
+
+   ```bash
+   docker compose up --build
+   ```
+
+   La primera vez tarda unos minutos. Está listo cuando aparece `Uvicorn running on http://0.0.0.0:8000`.
+
+4. Comprobar en el navegador:
+
+   | Dirección | Qué debe mostrar |
+   |---|---|
+   | <http://localhost:8000/salud> | `"estado": "ok"` y la base de datos conectada con 18 tablas |
+   | <http://localhost:8000/catalogos/hitos> | Los 7 hitos anatómicos en orden |
+   | <http://localhost:8000/docs> | La documentación interactiva de la API |
+
+5. Ejecutar las pruebas automáticas (en otra terminal, con el sistema levantado):
+
+   ```bash
+   docker compose exec api pytest -v
+   ```
+
+   Resultado esperado: `5 passed`.
+
+6. Detener el sistema: `Ctrl + C` y luego `docker compose down`. Para borrar también los datos de la base: `docker compose down -v`.
+
+### Estructura del código
+
+| Carpeta | Contenido | Responsable |
+|---|---|---|
+| `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
+| `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
+| `api/tests/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas y empaquetado con Docker | Nestor Velasco |
+
+### Problemas frecuentes
+
+| Síntoma | Solución |
+|---|---|
+| `Cannot connect to the Docker daemon` / `error during connect` | Abrir Docker Desktop y esperar a que diga *Engine running* |
+| `port is already allocated` | Otro programa usa el puerto 8000 o 5433: cerrarlo o reiniciar Docker Desktop |
+| `/salud` responde `503` | La base de datos aún arranca: esperar unos segundos y recargar |
+| Cambios en `db/migraciones/` no se aplican | Las migraciones solo corren con la base vacía: `docker compose down -v` y volver a levantar |
+
 ## Versiones
 
 | Versión | Contenido | Fecha objetivo |
