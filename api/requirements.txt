@@ -5,6 +5,9 @@ uvicorn==0.54.0
 psycopg[binary]==3.3.6
 psycopg-pool==3.3.3
 pydantic-settings==2.16.1
+# Fase 2: verificar el token de Supabase Auth (HS256, ES256 y RS256)
+PyJWT[crypto]==2.15.1
+# Cliente HTTP: la API lo usa para hablar con Supabase Auth y las pruebas para llamar a la API
+httpx2==2.16.0
 # Pruebas (Nestor Velasco)
 pytest==9.1.1
-httpx2==2.16.0

@@ -19,6 +19,16 @@ class Configuracion(BaseSettings):
     # Lista separada por comas, por ejemplo "http://localhost:5173,https://gastro-sim.app"
     cors_origenes: str = "http://localhost:5173"
 
+    # --- Supabase Auth (fase 2) ---
+    # URL del proyecto: con ella la API descarga las claves públicas (JWKS)
+    # para verificar los tokens de sesión.
+    supabase_url: str = ""
+    # Secreto JWT heredado (HS256). Solo si el proyecto aún firma con él.
+    supabase_jwt_secret: str = ""
+    # Clave service_role: permite borrar el factor 2FA al usar un código de
+    # recuperación. Es secreta: solo vive en el .env del servidor.
+    supabase_service_role_key: str = ""
+
     @property
     def origenes_permitidos(self) -> list[str]:
         return [o.strip() for o in self.cors_origenes.split(",") if o.strip()]
