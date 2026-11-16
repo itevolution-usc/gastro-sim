@@ -1,0 +1,74 @@
+/* Responsable: Cristian Cruz · Estilos base (colores de los wireframes W01–W21) */
+:root {
+  --fondo: #eef1f0;
+  --tarjeta: #ffffff;
+  --texto: #17201f;
+  --suave: #56625f;
+  --linea: #d3dbd8;
+  --marca: #0e5f5c;
+  --marca-texto: #ffffff;
+  --error: #b42318;
+  --error-fondo: #fdecea;
+  --info-fondo: #e6f2f1;
+  font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #0f1514;
+    --tarjeta: #18211f;
+    --texto: #e4ece9;
+    --suave: #a2b1ac;
+    --linea: #2c3936;
+    --marca: #5cc2bb;
+    --marca-texto: #0f1514;
+    --error: #ff8a80;
+    --error-fondo: #3a1d1b;
+    --info-fondo: #1d2e2c;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); }
+
+.pagina { min-height: 100vh; display: grid; place-content: center; gap: 12px; padding: 24px 16px; }
+.tarjeta { width: min(440px, calc(100vw - 32px)); background: var(--tarjeta); border: 1px solid var(--linea); border-radius: 12px; padding: 28px; box-shadow: 0 8px 28px rgb(0 0 0 / 0.08); }
+.marca { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--marca); margin-bottom: 16px; }
+.logo { display: grid; place-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--marca); color: var(--marca-texto); font-size: 12px; }
+.codigo { margin-left: auto; font: 500 12px ui-monospace, Consolas, monospace; color: var(--suave); }
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+.subtitulo { color: var(--suave); margin: 0 0 20px; }
+.pie { text-align: center; color: var(--suave); font-size: 13px; margin: 0; }
+
+.formulario { display: grid; gap: 14px; }
+label { display: grid; gap: 6px; font-weight: 600; font-size: 14px; }
+label small { font-weight: 400; color: var(--suave); }
+input:not([type='checkbox']) { font: inherit; padding: 10px 12px; border: 1px solid var(--linea); border-radius: 8px; background: transparent; color: var(--texto); }
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+input.codigo-grande { font: 600 1.4rem ui-monospace, Consolas, monospace; letter-spacing: 0.2em; text-align: center; }
+
+button { font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 11px 16px; border: 1px solid var(--marca); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+.primario { background: var(--marca); color: var(--marca-texto); width: 100%; margin-top: 4px; }
+.secundario { background: transparent; color: var(--marca); width: 100%; margin-top: 8px; }
+.enlace { background: none; border: 0; padding: 0; color: var(--marca); text-decoration: underline; font-weight: 500; font-size: 14px; }
+.enlaces { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; margin: 18px 0 0; font-size: 14px; }
+a { color: var(--marca); }
+
+.mensaje { border-radius: 8px; padding: 10px 12px; margin: 4px 0; font-size: 14px; }
+.mensaje.error { background: var(--error-fondo); color: var(--error); }
+.mensaje.info { background: var(--info-fondo); }
+.casilla { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; margin: 14px 0 6px; }
+.aviso ul { padding-left: 20px; margin: 8px 0; }
+
+.qr { width: 200px; height: 200px; justify-self: center; background: #fff; padding: 8px; border-radius: 8px; }
+.secreto { display: block; word-break: break-all; margin-top: 6px; }
+.codigos { columns: 2; padding-left: 24px; font-size: 15px; margin: 12px 0; }
+.codigos code { font: 600 15px ui-monospace, Consolas, monospace; }
+.datos { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0 0 12px; }
+.datos dt { color: var(--suave); }
+.datos dd { margin: 0; font-weight: 600; text-transform: capitalize; }
+.cargando { text-align: center; padding: 40vh 0; color: var(--suave); }
