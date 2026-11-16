@@ -1,0 +1,8 @@
+# Responsable: Cristian Cruz · Archivos del frontend que no se suben a GitHub
+node_modules
+dist
+*.log
+# Configuración local con las claves de Supabase (la plantilla .env.example sí se sube)
+.env
+.env.*
+!.env.example
