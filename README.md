@@ -113,13 +113,44 @@ Con **un solo comando** se levantan la base de datos (PostgreSQL 16) y la API (F
 
 6. Detener el sistema: `Ctrl + C` y luego `docker compose down`. Para borrar también los datos de la base: `docker compose down -v`.
 
+### Fase 2: cuentas, inicio de sesión y 2FA
+
+La autenticación usa **Supabase Auth** (contraseña + código TOTP de una app autenticadora). El navegador solo habla con Supabase para iniciar sesión; los datos siempre pasan por la API, que valida el token y exige el segundo factor (RF-01.5).
+
+1. **Configurar la API**: en el `.env` de la raíz, completar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y, para usar la base de datos de Supabase, `DATABASE_URL` con la cadena del *Session pooler* (agregando `?sslmode=require` al final).
+2. **Configurar el frontend**: copiar `frontend/.env.example` como `frontend/.env` y completar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (clave pública).
+3. **Levantar todo** (requiere [Node.js 22 LTS](https://nodejs.org/)):
+
+   ```bash
+   docker compose up --build -d
+   cd frontend
+   npm ci
+   npm run dev
+   ```
+
+4. Abrir <http://localhost:5173>: crear cuenta (W02) → aceptar el aviso y activar el 2FA (W03) → guardar los 10 códigos de recuperación → inicio (W06).
+
+| Pantalla | Ruta | Requisito |
+|---|---|---|
+| W01 Inicio de sesión | `/ingresar` | RF-01.2 |
+| W02 Crear cuenta | `/registro` | RF-01.1 |
+| W03 Aviso y activación del 2FA | `/activar` | RF-01.4, RF-01.6 |
+| W04 Verificación del 2FA | `/verificar` | RF-01.5 |
+| W05 Código de recuperación | `/recuperar` | RF-01.6 |
+| W06 Inicio (versión fase 2) | `/inicio` | — |
+
+**Pruebas:** `docker compose exec api pytest -v` (22 pruebas de la API) y, en `frontend/`, `npm test` (reglas de navegación). En cada pull request, GitHub Actions las ejecuta automáticamente (`.github/workflows/pruebas.yml`).
+
 ### Estructura del código
 
 | Carpeta | Contenido | Responsable |
 |---|---|---|
 | `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
 | `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
-| `api/tests/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas y empaquetado con Docker | Nestor Velasco |
+| `api/app/seguridad.py`, `api/app/auth_admin.py`, `api/app/routers/cuentas.py` | Sesión, 2FA y códigos de recuperación (fase 2) | Diego Agudelo |
+| `frontend/` | Aplicación web (React): pantallas W01 a W06 | Cristian Cruz |
+| `db/verificaciones/` | Verificación del esquema en Supabase | Jahan Chará |
+| `api/tests/`, `.github/workflows/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas, integración continua y empaquetado | Nestor Velasco |
 
 ### Problemas frecuentes
 
