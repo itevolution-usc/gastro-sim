@@ -16,6 +16,31 @@ export interface Perfil {
   nivel_sesion: 'aal1' | 'aal2'
 }
 
+// ---------- Fase 3: casos clínicos (RF-02.1, RF-04) ----------
+export type Dificultad = 'basico' | 'intermedio' | 'avanzado'
+export type Region = 'esofago' | 'estomago' | 'duodeno'
+
+export interface Historia {
+  edad: number
+  sexo: 'femenino' | 'masculino'
+  motivo: string
+  antecedentes: string[]
+  sintomas: string[]
+  texto: string
+}
+
+/** Lo que ve el estudiante. La API nunca envía la respuesta correcta (la clase). */
+export interface Caso {
+  id: string
+  dificultad: Dificultad
+  region: Region
+  historia: Historia
+  imagen_url: string | null
+  ubicacion: { hito: string; hito_nombre: string; x: number; y: number; z: number; radio_visibilidad: number }
+  licencia_imagen: string
+  creado_en: string
+}
+
 /** Error con el mensaje en español que envía la API (formato problem+json). */
 export class ErrorApi extends Error {
   readonly status: number
@@ -58,4 +83,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ codigo }),
     }),
+  generarCaso: (dificultad: Dificultad, region: Region | null) =>
+    pedir<Caso>('/casos', { method: 'POST', body: JSON.stringify({ dificultad, region }) }),
+  verCaso: (id: string) => pedir<Caso>(`/casos/${encodeURIComponent(id)}`),
 }

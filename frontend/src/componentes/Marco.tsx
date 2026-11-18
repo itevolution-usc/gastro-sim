@@ -5,13 +5,15 @@ interface Props {
   codigo: string
   titulo: string
   subtitulo?: string
+  /** Tarjeta más ancha para pantallas con imagen (fase 3: presentación del caso). */
+  ancho?: boolean
   children: ReactNode
 }
 
-export function Marco({ codigo, titulo, subtitulo, children }: Props) {
+export function Marco({ codigo, titulo, subtitulo, ancho = false, children }: Props) {
   return (
     <main className="pagina">
-      <section className="tarjeta" aria-labelledby="titulo">
+      <section className={ancho ? 'tarjeta ancha' : 'tarjeta'} aria-labelledby="titulo">
         <header className="marca">
           <span className="logo" aria-hidden="true">GS</span>
           <span>GASTRO-SIM</span>
