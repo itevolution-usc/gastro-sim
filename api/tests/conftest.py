@@ -6,7 +6,7 @@ Las pruebas usan la base de datos real indicada en DATABASE_URL (prueba de
 integración). El cliente se crea con "with" para que se ejecute el ciclo de
 vida de la API (abrir y cerrar el pool).
 
-Fase 2: las pruebas NO usan el Supabase real. Firman sus propios tokens con
+Fase 2 y 3: las pruebas NO usan el Supabase real ni Gemini. Firman sus propios tokens con
 un secreto de prueba, así corren sin internet, en cualquier computador y en
 GitHub Actions. Estas variables se fijan ANTES de importar la API para que
 ganen sobre lo que tenga el .env de cada uno.
@@ -18,6 +18,9 @@ import uuid
 os.environ["SUPABASE_JWT_SECRET"] = "secreto-solo-para-pruebas-automaticas-0123456789"
 os.environ["SUPABASE_URL"] = ""
 os.environ["SUPABASE_SERVICE_ROLE_KEY"] = ""
+# Fase 3: las pruebas nunca llaman a Gemini (sin costo ni internet). Usan el
+# generador local de plantillas o modelos falsos definidos en cada prueba.
+os.environ["GEMINI_API_KEY"] = ""
 
 import jwt  # noqa: E402
 import psycopg  # noqa: E402

@@ -11,6 +11,10 @@ __pycache__/
 venv/
 .pytest_cache/
 
+# Imágenes del dataset (fase 3): se suben a Supabase Storage, nunca a GitHub
+datos/
+*.zip
+
 # Node (frontend, fase 2)
 node_modules/
 dist/
