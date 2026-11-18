@@ -7,8 +7,10 @@ import { Marco } from './componentes/Marco'
 import { Protegida } from './componentes/Protegida'
 import { faltantes } from './config'
 import { Activar2FA } from './paginas/Activar2FA'
+import { Caso } from './paginas/Caso'
 import { Ingresar } from './paginas/Ingresar'
 import { Inicio } from './paginas/Inicio'
+import { NuevoCaso } from './paginas/NuevoCaso'
 import { Recuperar } from './paginas/Recuperar'
 import { Registro } from './paginas/Registro'
 import { Verificar2FA } from './paginas/Verificar2FA'
@@ -43,6 +45,9 @@ export default function App() {
         <Route path="/verificar" element={<Protegida permitir="/verificar"><Verificar2FA /></Protegida>} />
         <Route path="/recuperar" element={<Protegida permitir="/verificar"><Recuperar /></Protegida>} />
         <Route path="/inicio" element={<Protegida permitir="/inicio"><Inicio /></Protegida>} />
+        {/* Fase 3: casos clínicos. Exigen lo mismo que el inicio: aviso aceptado y 2FA verificado. */}
+        <Route path="/caso/nuevo" element={<Protegida permitir="/inicio"><NuevoCaso /></Protegida>} />
+        <Route path="/caso/:id" element={<Protegida permitir="/inicio"><Caso /></Protegida>} />
         <Route path="*" element={<Navigate to="/inicio" replace />} />
       </Routes>
     </BrowserRouter>
