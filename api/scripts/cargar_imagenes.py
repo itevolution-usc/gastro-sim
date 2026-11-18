@@ -19,9 +19,10 @@ import asyncio
 import hashlib
 import io
 import random
+import ssl
 import sys
 import zipfile
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import httpx2
 import psycopg
@@ -30,6 +31,18 @@ from app.config import obtener_configuracion
 from app.storage import AdaptadorStorage
 
 URL_HYPERKVASIR = "https://datasets.simula.no/downloads/hyper-kvasir/hyper-kvasir-labeled-images.zip"
+
+# El servidor de HyperKvasir no envía su certificado intermedio (Sectigo DV R36)
+# y Python rechaza la conexión. Lo guardamos en el repositorio (es público) y lo
+# sumamos a los certificados de confianza del sistema: la conexión sigue
+# verificada hasta la raíz de Sectigo. Nunca se desactiva la verificación.
+CERTIFICADO_INTERMEDIO = Path(__file__).parent / "certificados" / "sectigo_dv_r36.pem"
+
+
+def contexto_tls() -> ssl.SSLContext:
+    contexto = ssl.create_default_context()
+    contexto.load_verify_locations(cafile=CERTIFICADO_INTERMEDIO)
+    return contexto
 
 # Clases del tracto superior (las 7 de clase_hallazgo) y su dificultad didáctica:
 # lo normal es "basico"; lo sutil (grado A, segmento corto) es "avanzado".
@@ -49,7 +62,7 @@ class ArchivoRemoto(io.RawIOBase):
 
     def __init__(self, url: str):
         self._url = url
-        self._http = httpx2.Client(timeout=60, follow_redirects=True)
+        self._http = httpx2.Client(timeout=60, follow_redirects=True, verify=contexto_tls())
         r = self._http.head(url)
         r.raise_for_status()
         if r.headers.get("accept-ranges") != "bytes":
