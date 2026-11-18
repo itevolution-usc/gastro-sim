@@ -141,6 +141,44 @@ La autenticación usa **Supabase Auth** (contraseña + código TOTP de una app a
 
 **Pruebas:** `docker compose exec api pytest -v` (22 pruebas de la API) y, en `frontend/`, `npm test` (reglas de navegación). En cada pull request, GitHub Actions las ejecuta automáticamente (`.github/workflows/pruebas.yml`).
 
+### Fase 3: casos clínicos generados con IA
+
+El estudiante elige dificultad (y, si quiere, región) y la API arma un caso en menos de 15 s (RNF-14):
+
+1. Elige una imagen de **HyperKvasir** (pública, desidentificada, CC BY 4.0) guardada en Supabase Storage (RF-14.1).
+2. Ubica el hallazgo en la ruta 3D según `ubicacion_3d` (RF-14.3).
+3. **Gemini** redacta una historia clínica **sintética**; si está saturado, reintenta y cambia a un modelo de respaldo; si nada responde, usa el generador local de plantillas (RF-14.2, RF-07.3).
+4. Una cadena de validadores revisa campos, coherencia de región, que no revele la respuesta y que no tenga datos personales (RF-14.4, RNF-13). Hasta 3 intentos; si fallan, queda registro en `generacion_fallida`.
+5. Se guarda con modelo, versión de instrucciones y semilla para poder reproducirlo (RF-14.5). El docente lo aprueba o descarta (RF-14.6).
+
+**Configurar:**
+
+- `.env` de la raíz: `GEMINI_API_KEY` (gratis en <https://aistudio.google.com>). Si se deja vacía, funciona con el generador local.
+- Supabase → SQL Editor: ejecutar `db/migraciones/002_catalogo_casos.sql` (ubicaciones 3D y bucket privado `imagenes`).
+- Cargar el subconjunto de imágenes (5 por clase, solo baja esas imágenes, no los 3,9 GB):
+
+  ```bash
+  docker compose build api
+  docker compose run --rm api python -m scripts.cargar_imagenes --solo-listar
+  docker compose run --rm api python -m scripts.cargar_imagenes --por-clase 5
+  ```
+
+| Pantalla / ruta | Qué hace | Requisito |
+|---|---|---|
+| W06 `/inicio` | Formulario de nuevo caso (dificultad y región) | RF-02.1, RF-02.2 |
+| W07 `/caso/nuevo` | Generando el caso | RF-02.1 |
+| W08 `/caso/nuevo` | Error al generar, con reintento | RF-14.4 |
+| W10 `/caso/:id` | Historia clínica e imagen, sin la respuesta | RF-04 |
+
+| API | Rol | Requisito |
+|---|---|---|
+| `POST /casos` | Estudiante | RF-02.1, RF-14.1–14.5 |
+| `GET /casos/{id}` | Estudiante | RF-04 |
+| `GET /docente/casos?estado=pendiente` | Docente | RF-14.6 |
+| `PATCH /docente/casos/{id}` | Docente | RF-14.6 |
+
+**Pruebas:** 45 de la API (23 nuevas: validadores, reintentos de Gemini, generación y revisión docente) y 13 del frontend. Ninguna prueba llama a Gemini.
+
 ### Estructura del código
 
 | Carpeta | Contenido | Responsable |
@@ -148,9 +186,11 @@ La autenticación usa **Supabase Auth** (contraseña + código TOTP de una app a
 | `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
 | `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
 | `api/app/seguridad.py`, `api/app/auth_admin.py`, `api/app/routers/cuentas.py` | Sesión, 2FA y códigos de recuperación (fase 2) | Diego Agudelo |
-| `frontend/` | Aplicación web (React): pantallas W01 a W06 | Cristian Cruz |
+| `frontend/` | Aplicación web (React): pantallas W01 a W08 y W10 | Cristian Cruz |
 | `db/verificaciones/` | Verificación del esquema en Supabase | Jahan Chará |
 | `api/tests/`, `.github/workflows/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas, integración continua y empaquetado | Nestor Velasco |
+| `api/app/casos/`, `api/app/llm.py`, `api/app/routers/casos.py` | Generador de casos con IA (fase 3) | Emmanuel Ospina |
+| `api/app/storage.py`, `api/scripts/` | Imágenes en Supabase Storage y carga del dataset (fase 3) | Diego Agudelo |
 
 ### Problemas frecuentes
 

@@ -29,6 +29,21 @@ class Configuracion(BaseSettings):
     # recuperación. Es secreta: solo vive en el .env del servidor.
     supabase_service_role_key: str = ""
 
+    # Fase 3 · Generador de casos con IA (RF-14.2). Sin clave, la API usa el
+    # generador local de respaldo: funciona sin internet y sin costo.
+    gemini_api_key: str = ""
+    # El primero es el principal; los demás son respaldos si está saturado.
+    # flash-lite va primero: responde en ~1 s; los grandes suelen saturarse (RNF-14).
+    gemini_modelos: str = "gemini-3.5-flash-lite,gemini-3.8-flash,gemini-3.6-flash"
+    # Segundos máximos por llamada al modelo (RNF-14: caso listo en < 15 s).
+    llm_tiempo_maximo: float = 12.0
+    # Si todos los modelos fallan, usar el generador local en vez de fallar.
+    llm_respaldo_local: bool = True
+
+    @property
+    def modelos_gemini(self) -> list[str]:
+        return [m.strip() for m in self.gemini_modelos.split(",") if m.strip()]
+
     @property
     def origenes_permitidos(self) -> list[str]:
         return [o.strip() for o in self.cors_origenes.split(",") if o.strip()]
