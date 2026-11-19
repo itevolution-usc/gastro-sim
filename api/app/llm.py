@@ -185,3 +185,19 @@ def crear_cliente_llm(config: Configuracion) -> ReintentoConRespaldo:
     if config.llm_respaldo_local or not clientes:
         clientes.append(AdaptadorLocal())
     return ReintentoConRespaldo(clientes)
+
+
+def crear_cliente_tutor(config: Configuracion) -> ReintentoConRespaldo | None:
+    """Fábrica del tutor (fase 4, RF-07.1): solo modelos Gemini, sin plantillas.
+
+    El generador local de historias no sabe conversar, así que aquí no se usa.
+    Sin clave devuelve None y el tutor responde con su guía local (RF-07.3).
+    Temperatura baja: respuestas más prudentes. Plazo corto (RNF-03).
+    """
+    if not config.gemini_api_key:
+        return None
+    clientes: list[ClienteLLM] = [
+        AdaptadorGemini(m, config.gemini_api_key, config.llm_tiempo_maximo, temperatura=0.4)
+        for m in config.modelos_gemini
+    ]
+    return ReintentoConRespaldo(clientes, plazo_total=config.llm_tiempo_maximo)
