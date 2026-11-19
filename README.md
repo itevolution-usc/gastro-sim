@@ -179,6 +179,28 @@ El estudiante elige dificultad (y, si quiere, región) y la API arma un caso en 
 
 **Pruebas:** 45 de la API (23 nuevas: validadores, reintentos de Gemini, generación y revisión docente) y 13 del frontend. Ninguna prueba llama a Gemini.
 
+### Fase 4: resolver un caso (decisiones, IA, tutor y puntaje)
+
+Desde un caso, **Resolver este caso** abre un *intento* que avanza por estados (patrón State, figura SW6):
+
+1. **Decisión inicial** (W10): el estudiante elige el hallazgo y su confianza de 1 a 5, antes de ver a la IA (RF-05).
+2. **Recomendación de la IA** (W11): clase sugerida, % de confianza y recuadro (ROI) sobre la imagen (RF-06). Un porcentaje se **altera a propósito** (clase incorrecta, confianza engañosa o recuadro desplazado) para medir la sobre-dependencia (RF-08). El docente configura el porcentaje y los tipos (máx. 50 %; por defecto 25 %).
+3. **Tutor socrático** (W11/W13): Gemini guía con preguntas, **no conoce la respuesta** y un guardián bloquea cualquier respuesta que afirme un diagnóstico. Si Gemini no responde, contesta una guía local. Máximo 8 preguntas por caso (RF-07).
+4. **Decisión final** (RF-09) y **retroalimentación** (W14): respuesta correcta, si la IA fue alterada, puntaje (acierto 100 + detectar el error de la IA 50 + calibración hasta 25), puntos, nivel e insignias (RF-10, RF-11).
+
+Mientras se entrena el modelo de visión (actividad 4304), la recomendación la da una **IA simulada** (`simulada-v0`): acierta la clase con una confianza verosímil, y sus errores vienen solo de las alteraciones controladas. Cuando la tabla `prediccion` tenga datos del modelo real, la API los usa automáticamente.
+
+| API | Rol | Requisito |
+|---|---|---|
+| `POST /intentos` · `GET /intentos/{id}` | Estudiante | RF-05 |
+| `POST /intentos/{id}/eventos` | Estudiante (escena 3D) | RF-12 |
+| `POST /intentos/{id}/decision-inicial` | Estudiante | RF-05, RF-06, RF-08 |
+| `POST /intentos/{id}/tutor` | Estudiante | RF-07 |
+| `POST /intentos/{id}/decision-final` | Estudiante | RF-09, RF-10, RF-11 |
+| `GET` · `PUT /docente/alteraciones` | Docente | RF-08.1, RF-08.2 |
+
+**Pruebas:** 70 de la API (25 nuevas) y 17 del frontend. Ninguna prueba llama a Gemini.
+
 ### Estructura del código
 
 | Carpeta | Contenido | Responsable |
@@ -186,11 +208,14 @@ El estudiante elige dificultad (y, si quiere, región) y la API arma un caso en 
 | `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
 | `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
 | `api/app/seguridad.py`, `api/app/auth_admin.py`, `api/app/routers/cuentas.py` | Sesión, 2FA y códigos de recuperación (fase 2) | Diego Agudelo |
-| `frontend/` | Aplicación web (React): pantallas W01 a W08 y W10 | Cristian Cruz |
+| `frontend/` | Aplicación web (React): pantallas W01 a W08, W10, W11, W13 y W14 | Cristian Cruz |
 | `db/verificaciones/` | Verificación del esquema en Supabase | Jahan Chará |
 | `api/tests/`, `.github/workflows/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas, integración continua y empaquetado | Nestor Velasco |
 | `api/app/casos/`, `api/app/llm.py`, `api/app/routers/casos.py` | Generador de casos con IA (fase 3) | Emmanuel Ospina |
 | `api/app/storage.py`, `api/scripts/` | Imágenes en Supabase Storage y carga del dataset (fase 3) | Diego Agudelo |
+| `api/app/alteraciones/`, `api/app/tutor/`, `api/app/routers/alteraciones.py` | Alteraciones de la IA y tutor socrático (fase 4) | Emmanuel Ospina |
+| `api/app/intentos/puntaje.py` | Puntaje, niveles e insignias (fase 4) | Jahan Chará |
+| `api/app/intentos/`, `api/app/routers/intentos.py` | Intentos, recomendación de la IA y telemetría (fase 4) | Diego Agudelo |
 
 ### Problemas frecuentes
 

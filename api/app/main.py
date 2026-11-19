@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import obtener_configuracion
 from .db import abrir_pool, cerrar_pool
 from .errores import registrar_manejadores
-from .routers import alteraciones, casos, cuentas, salud
+from .routers import alteraciones, casos, cuentas, intentos, salud
 
 
 @asynccontextmanager
@@ -46,6 +46,7 @@ def crear_app() -> FastAPI:
     app.include_router(cuentas.router)  # fase 2: perfil, aviso y 2FA
     app.include_router(casos.router)  # fase 3: casos clínicos con IA
     app.include_router(alteraciones.router)  # fase 4: configuración de alteraciones (docente)
+    app.include_router(intentos.router)  # fase 4: decisiones, recomendación, tutor y puntaje
     return app
 
 
