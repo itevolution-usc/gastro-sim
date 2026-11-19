@@ -10,6 +10,7 @@ import { Activar2FA } from './paginas/Activar2FA'
 import { Caso } from './paginas/Caso'
 import { Ingresar } from './paginas/Ingresar'
 import { Inicio } from './paginas/Inicio'
+import { Intento } from './paginas/Intento'
 import { NuevoCaso } from './paginas/NuevoCaso'
 import { Recuperar } from './paginas/Recuperar'
 import { Registro } from './paginas/Registro'
@@ -48,6 +49,8 @@ export default function App() {
         {/* Fase 3: casos clínicos. Exigen lo mismo que el inicio: aviso aceptado y 2FA verificado. */}
         <Route path="/caso/nuevo" element={<Protegida permitir="/inicio"><NuevoCaso /></Protegida>} />
         <Route path="/caso/:id" element={<Protegida permitir="/inicio"><Caso /></Protegida>} />
+        {/* Fase 4: resolver el caso (decisiones, recomendación de la IA, tutor y puntaje). */}
+        <Route path="/intento/:id" element={<Protegida permitir="/inicio"><Intento /></Protegida>} />
         <Route path="*" element={<Navigate to="/inicio" replace />} />
       </Routes>
     </BrowserRouter>

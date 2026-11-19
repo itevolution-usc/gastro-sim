@@ -41,6 +41,80 @@ export interface Caso {
   creado_en: string
 }
 
+// ---------- Fase 4: resolver un caso (RF-05, RF-07, RF-09 a RF-11) ----------
+export type EstadoIntento =
+  | 'explorando'
+  | 'hallazgo_capturado'
+  | 'decision_inicial'
+  | 'recomendacion'
+  | 'finalizado'
+  | 'abandonado'
+
+export interface Opcion {
+  clase: string
+  nombre: string
+}
+
+export interface DecisionTomada extends Opcion {
+  confianza: number // 1 a 5
+}
+
+/** Lo que sugiere la IA. Puede estar alterada a propósito: el estudiante no lo sabe hasta el final. */
+export interface Recomendacion extends Opcion {
+  confianza: number // 0 a 1
+  roi: { x: number; y: number; w: number; h: number } // recuadro, en fracciones de la imagen
+}
+
+export interface MensajeTutor {
+  emisor: 'estudiante' | 'tutor' | 'sistema'
+  contenido: string
+  es_respaldo: boolean
+  creado_en: string
+}
+
+export interface Insignia {
+  codigo: string
+  nombre: string
+  descripcion: string
+}
+
+export interface Retroalimentacion {
+  referencia: Opcion
+  acierto_usuario: boolean
+  acierto_ia: boolean
+  alterada: boolean
+  tipo_alteracion: 'clase_incorrecta' | 'confianza_alterada' | 'roi_desplazada' | null
+  cambio_decision: boolean
+  detecto_error_ia: boolean
+  puntaje: number
+  desglose: { acierto: number; deteccion: number; calibracion: number; total: number }
+  explicacion: string[]
+  puntos_totales: number
+  nivel: number
+  subio_de_nivel: boolean
+  insignias_nuevas: Insignia[]
+}
+
+export interface Intento {
+  id: string
+  caso_id: string
+  estado: EstadoIntento
+  region: Region
+  opciones: Opcion[]
+  decision_inicial: DecisionTomada | null
+  recomendacion: Recomendacion | null
+  mensajes: MensajeTutor[]
+  mensajes_restantes: number
+  decision_final: DecisionTomada | null
+  retroalimentacion: Retroalimentacion | null // solo al final: aquí llega la respuesta correcta
+}
+
+export interface RespuestaTutor {
+  respuesta: string
+  es_respaldo: boolean
+  mensajes_restantes: number
+}
+
 /** Error con el mensaje en español que envía la API (formato problem+json). */
 export class ErrorApi extends Error {
   readonly status: number
@@ -86,4 +160,23 @@ export const api = {
   generarCaso: (dificultad: Dificultad, region: Region | null) =>
     pedir<Caso>('/casos', { method: 'POST', body: JSON.stringify({ dificultad, region }) }),
   verCaso: (id: string) => pedir<Caso>(`/casos/${encodeURIComponent(id)}`),
+  // Fase 4
+  iniciarIntento: (casoId: string) =>
+    pedir<Intento>('/intentos', { method: 'POST', body: JSON.stringify({ caso_id: casoId }) }),
+  verIntento: (id: string) => pedir<Intento>(`/intentos/${encodeURIComponent(id)}`),
+  decisionInicial: (id: string, clase: string, confianza: number) =>
+    pedir<Intento>(`/intentos/${encodeURIComponent(id)}/decision-inicial`, {
+      method: 'POST',
+      body: JSON.stringify({ clase, confianza }),
+    }),
+  preguntarTutor: (id: string, mensaje: string) =>
+    pedir<RespuestaTutor>(`/intentos/${encodeURIComponent(id)}/tutor`, {
+      method: 'POST',
+      body: JSON.stringify({ mensaje }),
+    }),
+  decisionFinal: (id: string, clase: string, confianza: number) =>
+    pedir<Intento>(`/intentos/${encodeURIComponent(id)}/decision-final`, {
+      method: 'POST',
+      body: JSON.stringify({ clase, confianza }),
+    }),
 }
