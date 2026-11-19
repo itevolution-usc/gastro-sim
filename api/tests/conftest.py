@@ -18,8 +18,8 @@ import uuid
 os.environ["SUPABASE_JWT_SECRET"] = "secreto-solo-para-pruebas-automaticas-0123456789"
 os.environ["SUPABASE_URL"] = ""
 os.environ["SUPABASE_SERVICE_ROLE_KEY"] = ""
-# Fase 3: las pruebas nunca llaman a Gemini (sin costo ni internet). Usan el
-# generador local de plantillas o modelos falsos definidos en cada prueba.
+# Fase 3 y 4: las pruebas nunca llaman a Gemini (sin costo ni internet). Usan el
+# generador local de plantillas, la guía local del tutor o modelos falsos.
 os.environ["GEMINI_API_KEY"] = ""
 
 import jwt  # noqa: E402
@@ -59,5 +59,10 @@ def usuario():
         conexion.execute("insert into auth.users (id, email) values (%s, %s)", (usuario_id, email))
     yield {"id": usuario_id, "email": email}
     with psycopg.connect(url, autocommit=True) as conexion:
+        # Fase 4: los intentos (esquema investigacion) y las configuraciones del docente
+        # no se borran en cascada con la cuenta: se limpian primero.
+        conexion.execute("""delete from investigacion.intento where participante =
+                            (select seudonimo from public.perfil where id = %s)""", (usuario_id,))
+        conexion.execute("delete from public.config_alteracion where creado_por = %s", (usuario_id,))
         conexion.execute("delete from public.auditoria_cuenta where afectado_id = %s", (usuario_id,))
         conexion.execute("delete from auth.users where id = %s", (usuario_id,))
