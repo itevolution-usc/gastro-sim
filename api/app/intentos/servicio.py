@@ -10,6 +10,7 @@ Responsable: Diego Agudelo · Actividades 4501–4505 (RF-05, RF-08.3, RF-09 a R
   5. decision_final     cierra, calcula puntaje e insignias y revela la verdad
                         (referencia y si la IA fue alterada) (RF-09 a RF-11)
   Fase 6: historial (RF-02.3) y progreso (nivel, puntos e insignias, RF-11) para el W06.
+  Fase 7: tablero de desempeño (RF-13) para el W16.
 
 La respuesta correcta (referencia) NUNCA sale antes de "finalizado".
 """
@@ -19,6 +20,7 @@ from ..alteraciones import repositorio as repo_alteraciones
 from ..alteraciones.estrategias import Clase, Recomendacion, Roi, ServicioAlteraciones
 from ..tutor.prompts import ContextoTutor
 from ..tutor.servicio import ServicioTutor
+from . import desempeno as metricas
 from . import puntaje as reglas
 from . import repositorio as repo
 from .dominio import TransicionInvalida, estado
@@ -186,6 +188,11 @@ class ServicioIntentos:
                 for i in await repo.insignias(self._db)
             ],
         }
+
+    async def desempeno(self, perfil_id: UUID) -> dict:
+        """RF-13: precisión, detección de errores de la IA, sobredependencia y calibración (W16)."""
+        perfil = await self._perfil(perfil_id)
+        return metricas.calcular(await repo.filas_desempeno(self._db, perfil["seudonimo"]))
 
     # ---------- Ayudantes ----------
     async def _perfil(self, perfil_id: UUID) -> dict:
