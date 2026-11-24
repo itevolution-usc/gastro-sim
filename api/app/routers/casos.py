@@ -5,6 +5,7 @@ Responsable: Emmanuel Ospina · RF-02.1, RF-04, RF-14.1 a RF-14.6.
   POST  /casos                 genera un caso nuevo (estudiante)
   GET   /casos/{id}            presenta un caso, sin la respuesta (estudiante)
   GET   /docente/casos         bandeja de revisión (docente o admin)
+  GET   /docente/casos/resumen fase 6: cuántos hay por estado, para las pestañas del W18
   PATCH /docente/casos/{id}    aprobar o descartar con motivo (docente o admin)
 
 Todas exigen sesión con 2FA (aal2), igual que la fase 2.
@@ -106,6 +107,11 @@ async def bandeja_docente(
     servicio: ServicioCasos = Depends(obtener_servicio),
 ):
     return await servicio.para_docente(None if estado == "todos" else estado, limite)
+
+
+@router.get("/docente/casos/resumen")
+async def resumen_docente(_: Usuario = Depends(docente_actual), conexion=Depends(obtener_conexion)):
+    return await repo.contar_por_estado(conexion)
 
 
 @router.patch("/docente/casos/{caso_id}")

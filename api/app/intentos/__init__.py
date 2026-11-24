@@ -7,4 +7,5 @@ dominio.py      estados del intento, patrón State (Diego Agudelo)
 vision.py       recomendación de la IA de visión (Diego Agudelo)
 repositorio.py  consultas SQL (Diego Agudelo)
 servicio.py     fachada que coordina todo (Diego Agudelo)
+exportacion.py  fase 6: CSV seudonimizado para la investigación, RF-15 (Jahan Michelle Chará)
 """

@@ -9,6 +9,7 @@ Responsable: Diego Agudelo · Actividades 4501–4505 (RF-05, RF-08.3, RF-09 a R
   4. preguntar          tutor socrático (RF-07), máximo MAX_MENSAJES_TUTOR
   5. decision_final     cierra, calcula puntaje e insignias y revela la verdad
                         (referencia y si la IA fue alterada) (RF-09 a RF-11)
+  Fase 6: historial (RF-02.3) y progreso (nivel, puntos e insignias, RF-11) para el W06.
 
 La respuesta correcta (referencia) NUNCA sale antes de "finalizado".
 """
@@ -145,6 +146,46 @@ class ServicioIntentos:
             "subio_de_nivel": nivel > perfil["nivel"], "insignias_nuevas": nuevas,
         })
         return vista
+
+    # ---------- Fase 6: historial y progreso (W06) ----------
+    async def historial(self, perfil_id: UUID, limite: int) -> list[dict]:
+        """RF-02.3: casos resueltos (y en curso) del estudiante. Sin la respuesta correcta."""
+        perfil = await self._perfil(perfil_id)
+        filas = await repo.mis_intentos(self._db, perfil["seudonimo"], limite)
+        return [
+            {
+                "id": str(f["id"]),
+                "caso_id": str(f["caso_id"]),
+                "estado": f["estado"],
+                "fecha": f["iniciado_en"].isoformat(),
+                "region": f["region"],
+                "dificultad": f["dificultad"],
+                "acierto": f["acierto_usuario"] if f["estado"] == "finalizado" else None,
+                "puntaje": f["puntaje"],
+                # Un caso que el docente descartó ya no se puede repetir (RF-14.6).
+                "puede_repetir": f["estado_caso"] != "descartado",
+            }
+            for f in filas
+        ]
+
+    async def progreso(self, perfil_id: UUID) -> dict:
+        """RF-11: nivel, puntos y las insignias (ganadas y por ganar) del estudiante."""
+        perfil = await self._perfil(perfil_id)
+        ganadas = await repo.insignias_de(self._db, perfil_id)
+        nivel = perfil["nivel"]
+        siguiente = None if nivel >= reglas.NIVEL_MAXIMO else nivel * reglas.PUNTOS_POR_NIVEL
+        return {
+            "puntos": perfil["puntos"],
+            "nivel": nivel,
+            "nivel_maximo": reglas.NIVEL_MAXIMO,
+            "puntos_por_nivel": reglas.PUNTOS_POR_NIVEL,
+            "puntos_siguiente_nivel": siguiente,
+            "insignias": [
+                {"codigo": i["codigo"], "nombre": i["nombre"], "descripcion": i["descripcion"],
+                 "obtenida": i["codigo"] in ganadas}
+                for i in await repo.insignias(self._db)
+            ],
+        }
 
     # ---------- Ayudantes ----------
     async def _perfil(self, perfil_id: UUID) -> dict:
