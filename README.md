@@ -226,8 +226,9 @@ Diseño: patrón **Observer** (figura P5). El motor 3D *emite* eventos en un bus
 | **W18** Revisión de casos (`/docente/casos`) | Pestañas Pendientes, Aprobados y Descartados con su conteo. Por cada caso: imagen, etiqueta (la respuesta), hito 3D, modelo, versión de las instrucciones, semilla, tiempo de generación, las 4 reglas de la validación y la historia. **Aprobar** o **Descartar con motivo** | RF-14.6 |
 | **W19** Configuración y exportación (`/docente/configuracion`) | Porcentaje de intentos con la IA alterada (0 a 50 %), tipos de alteración y **Descargar CSV** de los intentos, seudonimizado | RF-08.1, RF-08.2, RF-15 |
 
-Solo las cuentas con rol `docente` o `admin` ven los accesos a W18 y W19; la API también lo exige (403). Para probar, cambie el rol en la base local:
-`docker compose exec db psql -U gastro -d gastro_sim -c "update public.perfil set rol = 'docente' where nombre_visible = 'SU_USUARIO';"`
+Solo las cuentas con rol `docente` o `admin` ven los accesos a W18 y W19; la API también lo exige (403). Para probar, cambie el rol en la base de datos que usa su API (en Supabase: **SQL Editor**):
+`update public.perfil set rol = 'docente' where id = (select id from auth.users where email = 'SU_CORREO');`
+Desde la fase 7, un docente o administrador también puede cambiar roles en la pantalla **W20**.
 
 | Ruta nueva | Quién | Requisito |
 |---|---|---|
@@ -240,6 +241,35 @@ Solo las cuentas con rol `docente` o `admin` ven los accesos a W18 y W19; la API
 
 **Pruebas:** 88 de la API (11 nuevas) y 42 del frontend (10 nuevas).
 
+### Fase 7: tablero de desempeño y administración de cuentas
+
+| Pantalla | Qué hace | Quién la usa | Requisitos |
+|---|---|---|---|
+| **W16** Mi desempeño (`/desempeno`) | Precisión de decisiones, errores de la IA detectados, sobredependencia, calibración de la confianza y una gráfica por semana | Estudiante | RF-13 |
+| **W20** Usuarios y roles (`/docente/usuarios`) | Buscar por correo o nombre, cambiar el rol estudiante ↔ docente y ver los últimos cambios registrados | Docente o admin | RF-01.3 |
+| **W21** Restablecer 2FA | Confirmación antes de borrar el autenticador y los códigos de recuperación de otra cuenta | Solo admin | RF-01.7 |
+
+**Cómo se calculan las métricas del W16** (`api/app/intentos/desempeno.py`, solo intentos terminados):
+
+| Métrica | Cálculo |
+|---|---|
+| Precisión | decisiones finales correctas / intentos |
+| Errores de la IA detectados | de los casos en que la recomendación mostrada no era la respuesta (alterada o error real), en cuántos la decisión final no siguió a la IA |
+| Sobredependencia | de esos casos en que el estudiante empezó con otra respuesta, en cuántos se cambió a la de la IA |
+| Calibración | 1 − Brier, con la confianza 1 a 5 como 20 % a 100 %. 1,00 es perfecta. Buena ≥ 0,80; regular ≥ 0,65 |
+
+**Reglas de la administración:** nadie cambia su propio rol ni restablece su propio 2FA desde W20 (para eso está W05); el rol `admin` solo se asigna en la base de datos; el cambio de rol aplica de inmediato porque la API lee el rol en cada petición. Cada cambio queda en `auditoria_cuenta` (quién, a quién, qué y cuándo). Si Supabase Auth no responde al restablecer, no se borra nada (503).
+
+| Ruta nueva | Quién | Requisito |
+|---|---|---|
+| `GET /mi-desempeno` | Estudiante | RF-13 |
+| `GET /admin/usuarios?buscar=` | Docente o admin | RF-01.3 |
+| `PATCH /admin/usuarios/{id}/rol` | Docente o admin | RF-01.3 |
+| `POST /admin/usuarios/{id}/restablecer-2fa` | Solo admin | RF-01.7 |
+| `GET /admin/auditoria` | Docente o admin | RF-01.7 |
+
+**Pruebas:** 98 de la API (10 nuevas) y 48 del frontend (6 nuevas).
+
 ### Estructura del código
 
 | Carpeta | Contenido | Responsable |
@@ -247,7 +277,7 @@ Solo las cuentas con rol `docente` o `admin` ven los accesos a W18 y W19; la API
 | `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
 | `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
 | `api/app/seguridad.py`, `api/app/auth_admin.py`, `api/app/routers/cuentas.py` | Sesión, 2FA y códigos de recuperación (fase 2) | Diego Agudelo |
-| `frontend/` | Aplicación web (React): pantallas W01 a W11, W13, W14, W18 y W19 | Cristian Cruz |
+| `frontend/` | Aplicación web (React): pantallas W01 a W11, W13, W14 y W16 a W21 | Cristian Cruz |
 | `frontend/src/escena/`, `frontend/public/modelos/` | Simulador 3D: motor three.js, bus de eventos, telemetría y modelo de Blender (fase 5) | Cristian Cruz |
 | `db/verificaciones/` | Verificación del esquema en Supabase | Jahan Chará |
 | `api/tests/`, `.github/workflows/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas, integración continua y empaquetado | Nestor Velasco |
@@ -259,6 +289,9 @@ Solo las cuentas con rol `docente` o `admin` ven los accesos a W18 y W19; la API
 | Validación de hitos y `hitos_visitados` en `api/app/intentos/` y `routers/intentos.py` | Registro de hitos de la escena 3D (fase 5) | Jahan Chará |
 | `api/app/intentos/exportacion.py`, historial y progreso en `api/app/intentos/`, resumen y exportación del docente | Historial, progreso y exportación a CSV (fase 6) | Jahan Chará |
 | `frontend/src/paginas/Docente*.tsx`, `frontend/src/estado/docente.ts` y `progreso.ts`, `Inicio.tsx` | Pantallas W18, W19 y W06 con historial y progreso (fase 6) | Cristian Cruz |
+| `api/app/intentos/desempeno.py` y `GET /mi-desempeno` | Métricas del tablero de desempeño (fase 7) | Jahan Chará |
+| `api/app/admin/`, `api/app/routers/admin.py` | Usuarios, roles y restablecimiento del 2FA con auditoría (fase 7) | Diego Agudelo |
+| `frontend/src/paginas/Desempeno.tsx`, `Usuarios.tsx`, `frontend/src/estado/desempeno.ts` | Pantallas W16, W20 y W21 (fase 7) | Cristian Cruz |
 
 ### Problemas frecuentes
 
