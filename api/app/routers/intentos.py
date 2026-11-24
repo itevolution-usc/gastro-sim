@@ -18,12 +18,12 @@ from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..alteraciones.estrategias import ServicioAlteraciones
 from ..config import obtener_configuracion
 from ..db import obtener_conexion
-from ..intentos.dominio import TransicionInvalida
+from ..intentos.dominio import HITOS, TransicionInvalida
 from ..intentos.servicio import NoEncontrado, OpcionInvalida, ServicioIntentos
 from ..llm import crear_cliente_tutor
 from ..seguridad import Usuario, usuario_con_2fa
@@ -85,6 +85,14 @@ class Evento(BaseModel):
         if len(str(datos)) > 2000:
             raise ValueError("Datos del evento demasiado grandes")
         return datos
+
+    @model_validator(mode="after")
+    def _hito_conocido(self) -> "Evento":
+        # Fase 5 (RF-03.3): un hito visitado debe ser uno de los 7 del catálogo; así la insignia
+        # "Explorador" y el tablero no cuentan nombres inventados.
+        if self.tipo == "hito_visitado" and self.datos.get("hito") not in HITOS:
+            raise ValueError(f"Hito desconocido. Use uno de: {', '.join(HITOS)}")
+        return self
 
 
 class LoteEventos(BaseModel):

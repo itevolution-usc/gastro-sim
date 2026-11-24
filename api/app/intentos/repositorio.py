@@ -141,6 +141,17 @@ async def hitos_visitados(conexion, intento_id: UUID) -> int:
     return fila["n"]
 
 
+async def lista_hitos_visitados(conexion, intento_id: UUID) -> list[str]:
+    """Fase 5: hitos ya visitados, en el orden en que se visitaron (la escena los marca al recargar)."""
+    filas = await (await conexion.execute(
+        """select datos->>'hito' as hito from investigacion.evento_telemetria
+           where intento_id = %s and tipo = 'hito_visitado'
+           group by datos->>'hito' order by min(ocurrido_en)""",
+        (intento_id,),
+    )).fetchall()
+    return [f["hito"] for f in filas]
+
+
 async def sumar_puntos(conexion, perfil_id: UUID, puntos: int) -> int:
     fila = await (await conexion.execute(
         "update public.perfil set puntos = puntos + %s where id = %s returning puntos", (puntos, perfil_id)

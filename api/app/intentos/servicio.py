@@ -215,6 +215,8 @@ class ServicioIntentos:
             "mensajes_restantes": 0,
             "decision_final": decision(it["decision_final_id"], it["confianza_final"]),
             "retroalimentacion": None,
+            # Fase 5: para que la escena 3D marque los hitos ya visitados si el estudiante recarga.
+            "hitos_visitados": await repo.lista_hitos_visitados(self._db, it["id"]),
         }
         if it["estado"] in ("recomendacion", "finalizado"):
             historial = await repo.mensajes(self._db, it["id"])
