@@ -1,4 +1,4 @@
-// Responsable: Cristian Cruz · Menú y guardia de las pantallas del docente (W18 y W19)
+// Responsable: Cristian Cruz · Menú y guardia de las pantallas del docente (W18, W19 y, desde la fase 7, W20)
 import type { ReactNode } from 'react'
 import { Navigate, NavLink } from 'react-router'
 
@@ -21,6 +21,9 @@ export function NavDocente() {
       </NavLink>
       <NavLink to="/docente/configuracion" className={clase}>
         Configuración y exportación
+      </NavLink>
+      <NavLink to="/docente/usuarios" className={clase}>
+        Usuarios
       </NavLink>
       <NavLink to="/inicio" end>
         Volver al inicio

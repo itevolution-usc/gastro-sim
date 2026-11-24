@@ -2,6 +2,7 @@
 // Fase 3: formulario "Nuevo caso" (RF-02.1, RF-02.2).
 // Fase 6: "Mi progreso" (nivel, puntos e insignias, RF-11), "Historial de casos" con
 // Repetir (RF-02.3) y, para docentes, el acceso a W18 y W19.
+// Fase 7: acceso a "Mi desempeño" (W16) y, para docentes, a Usuarios (W20).
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 
@@ -88,6 +89,7 @@ export function Inicio() {
               <h2>Docente</h2>
               <Link to="/docente/casos">Revisión de casos (W18)</Link>
               <Link to="/docente/configuracion">Configuración y exportación (W19)</Link>
+              <Link to="/docente/usuarios">Usuarios y roles (W20)</Link>
             </nav>
           )}
           <form className="formulario nuevo-caso" onSubmit={nuevoCaso}>
@@ -142,6 +144,9 @@ export function Inicio() {
                   </li>
                 ))}
               </ul>
+              <Link to="/desempeno" className="ver-desempeno">
+                Ver mi desempeño (W16) →
+              </Link>
             </>
           )}
         </section>

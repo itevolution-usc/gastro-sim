@@ -10,6 +10,7 @@ import { Protegida } from './componentes/Protegida'
 import { faltantes } from './config'
 import { Activar2FA } from './paginas/Activar2FA'
 import { Caso } from './paginas/Caso'
+import { Desempeno } from './paginas/Desempeno'
 import { DocenteCasos } from './paginas/DocenteCasos'
 import { DocenteConfig } from './paginas/DocenteConfig'
 import { Ingresar } from './paginas/Ingresar'
@@ -18,6 +19,7 @@ import { Intento } from './paginas/Intento'
 import { NuevoCaso } from './paginas/NuevoCaso'
 import { Recuperar } from './paginas/Recuperar'
 import { Registro } from './paginas/Registro'
+import { Usuarios } from './paginas/Usuarios'
 import { Verificar2FA } from './paginas/Verificar2FA'
 
 // Fase 5: demo del simulador 3D solo en desarrollo (npm run dev → http://localhost:5173/demo-3d).
@@ -75,6 +77,12 @@ export default function App() {
         <Route
           path="/docente/configuracion"
           element={<Protegida permitir="/inicio"><SoloDocente><DocenteConfig /></SoloDocente></Protegida>}
+        />
+        {/* Fase 7: tablero del estudiante (W16) y usuarios y roles (W20 y W21). */}
+        <Route path="/desempeno" element={<Protegida permitir="/inicio"><Desempeno /></Protegida>} />
+        <Route
+          path="/docente/usuarios"
+          element={<Protegida permitir="/inicio"><SoloDocente><Usuarios /></SoloDocente></Protegida>}
         />
         <Route path="*" element={<Navigate to="/inicio" replace />} />
       </Routes>
