@@ -193,6 +193,45 @@ export interface ConfigAlteraciones {
   por_defecto: boolean
 }
 
+// ---------- Fase 7: tablero de desempeño (W16) y administración de cuentas (W20, W21) ----------
+export interface SemanaDesempeno {
+  semana: string // lunes de la semana, AAAA-MM-DD
+  intentos: number
+  precision: number | null
+  deteccion: number | null
+}
+
+/** RF-13. Las razones van de 0 a 1; null cuando aún no hay casos para calcularlas. */
+export interface Desempeno {
+  intentos: number
+  aciertos: number
+  errores_ia: number
+  errores_ia_detectados: number
+  siguio_ia_errada: number
+  precision: number | null
+  deteccion: number | null
+  sobredependencia: number | null
+  calibracion: number | null
+  calibracion_etiqueta: 'buena' | 'regular' | 'por mejorar' | null
+  por_semana: SemanaDesempeno[]
+}
+
+export interface UsuarioAdmin {
+  id: string
+  nombre: string
+  correo: string
+  rol: Perfil['rol']
+  mfa_activado: boolean
+}
+
+export interface CambioAuditoria {
+  accion: 'asignar_rol' | 'retirar_rol' | 'restablecer_2fa'
+  detalle: Record<string, string | number>
+  fecha: string
+  actor: string
+  afectado: string
+}
+
 /** Error con el mensaje en español que envía la API (formato problem+json). */
 export class ErrorApi extends Error {
   readonly status: number
@@ -283,4 +322,16 @@ export const api = {
   guardarAlteraciones: (porcentaje: number, tipos: TipoAlteracion[]) =>
     pedir<ConfigAlteraciones>('/docente/alteraciones', { method: 'PUT', body: JSON.stringify({ porcentaje, tipos }) }),
   exportarIntentos: async () => (await solicitar('/docente/exportacion')).blob(),
+  // Fase 7: W16 tablero de desempeño
+  miDesempeno: () => pedir<Desempeno>('/mi-desempeno'),
+  // Fase 7: W20 usuarios y roles, W21 restablecer 2FA
+  usuarios: (buscar = '') =>
+    pedir<UsuarioAdmin[]>(`/admin/usuarios${buscar.trim() ? `?buscar=${encodeURIComponent(buscar.trim())}` : ''}`),
+  cambiarRol: (id: string, rol: 'estudiante' | 'docente') =>
+    pedir<UsuarioAdmin>(`/admin/usuarios/${encodeURIComponent(id)}/rol`, { method: 'PATCH', body: JSON.stringify({ rol }) }),
+  restablecer2fa: (id: string) =>
+    pedir<UsuarioAdmin & { codigos_eliminados: number }>(`/admin/usuarios/${encodeURIComponent(id)}/restablecer-2fa`, {
+      method: 'POST',
+    }),
+  auditoria: () => pedir<CambioAuditoria[]>('/admin/auditoria'),
 }

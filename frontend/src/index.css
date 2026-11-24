@@ -234,3 +234,45 @@ input[type='range'] { width: 100%; accent-color: var(--marca); }
   .inicio, .revision, .config-docente { grid-template-columns: minmax(0, 1fr); }
   .lista-casos { max-height: 240px; }
 }
+
+/* ---------- Fase 7: tablero de desempeño (W16), usuarios y roles (W20, W21) ---------- */
+.ver-desempeno { display: inline-block; margin-top: 12px; font-weight: 600; }
+.indicadores { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.indicador { border: 1px solid var(--linea); border-radius: 10px; padding: 12px 14px; }
+.indicador h2 { font-size: 13px; margin: 0; color: var(--suave); font-weight: 600; }
+.indicador .cifra { font-size: 1.9rem; font-weight: 700; margin: 4px 0 0; color: var(--marca); }
+.indicador .ayuda { margin: 0; }
+.grafica { border: 1px solid var(--linea); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+.grafica h2 { font-size: 15px; margin: 0 0 6px; }
+.lienzo-grafica { width: 100%; height: auto; display: block; }
+.lienzo-grafica .guia { stroke: var(--linea); stroke-width: 1; }
+.lienzo-grafica .eje { fill: var(--suave); font-size: 11px; }
+.serie polyline { fill: none; stroke-width: 3; stroke-linejoin: round; }
+.serie.precision polyline { stroke: var(--marca); }
+.serie.precision circle { fill: var(--marca); }
+.serie.deteccion polyline { stroke: #e0662b; stroke-dasharray: 6 4; }
+.serie.deteccion circle { fill: #e0662b; }
+.grafica .leyenda { gap: 6px; flex-wrap: wrap; }
+.muestra { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-left: 8px; }
+.muestra.precision { background: var(--marca); }
+.muestra.deteccion { background: #e0662b; }
+.buscador { display: flex; gap: 8px; margin-bottom: 12px; }
+.buscador input { flex: 1; min-width: 0; }
+.buscador button { width: auto; margin: 0; }
+td.pendiente { color: #b26a00; font-weight: 600; }
+td.bien { color: var(--marca); font-weight: 600; }
+td select { padding: 6px 8px; }
+.rol { text-transform: capitalize; }
+.registro { border-top: 1px solid var(--linea); margin-top: 12px; padding-top: 12px; }
+.registro h2 { font-size: 15px; margin: 0 0 6px; }
+.registro ul { margin: 0; padding-left: 20px; font-size: 14px; display: grid; gap: 4px; }
+.fondo-modal { position: fixed; inset: 0; background: rgb(0 0 0 / 0.5); display: grid; place-content: center; padding: 16px; z-index: 10; }
+.modal { background: var(--tarjeta); border: 1px solid var(--linea); border-radius: 12px; padding: 20px 22px; width: min(460px, calc(100vw - 32px)); box-shadow: 0 12px 40px rgb(0 0 0 / 0.3); }
+.modal h2 { font-size: 1.1rem; margin: 0 0 10px; }
+.modal p { margin: 6px 0; }
+.modal .botones { margin-top: 14px; }
+.modal .secundario { margin: 0; }
+
+@media (max-width: 760px) {
+  .indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
