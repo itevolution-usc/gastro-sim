@@ -5,10 +5,13 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 
 import { Marco } from './componentes/Marco'
+import { SoloDocente } from './componentes/NavDocente'
 import { Protegida } from './componentes/Protegida'
 import { faltantes } from './config'
 import { Activar2FA } from './paginas/Activar2FA'
 import { Caso } from './paginas/Caso'
+import { DocenteCasos } from './paginas/DocenteCasos'
+import { DocenteConfig } from './paginas/DocenteConfig'
 import { Ingresar } from './paginas/Ingresar'
 import { Inicio } from './paginas/Inicio'
 import { Intento } from './paginas/Intento'
@@ -64,6 +67,15 @@ export default function App() {
         <Route path="/caso/:id" element={<Protegida permitir="/inicio"><Caso /></Protegida>} />
         {/* Fase 4: resolver el caso (decisiones, recomendación de la IA, tutor y puntaje). */}
         <Route path="/intento/:id" element={<Protegida permitir="/inicio"><Intento /></Protegida>} />
+        {/* Fase 6: herramientas del docente (W18 y W19). Solo docentes y administradores. */}
+        <Route
+          path="/docente/casos"
+          element={<Protegida permitir="/inicio"><SoloDocente><DocenteCasos /></SoloDocente></Protegida>}
+        />
+        <Route
+          path="/docente/configuracion"
+          element={<Protegida permitir="/inicio"><SoloDocente><DocenteConfig /></SoloDocente></Protegida>}
+        />
         <Route path="*" element={<Navigate to="/inicio" replace />} />
       </Routes>
     </BrowserRouter>
