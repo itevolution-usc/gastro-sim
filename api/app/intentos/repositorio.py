@@ -226,3 +226,19 @@ async def filas_exportacion(conexion) -> list[dict]:
            where it.estado = 'finalizado'
            order by it.finalizado_en, it.id""",
     )).fetchall()
+
+
+# ---------- Fase 7: tablero de desempeño (RF-13) ----------
+
+async def filas_desempeno(conexion, participante: UUID) -> list[dict]:
+    """Intentos terminados del estudiante, con lo necesario para las métricas del W16."""
+    return await (await conexion.execute(
+        """select it.acierto_usuario as acierto, it.confianza_final as confianza,
+                  it.decision_inicial_id as inicial, it.decision_final_id as final,
+                  (it.recomendacion_mostrada->>'clase_id')::smallint as recomendada,
+                  c.referencia_id as referencia, it.finalizado_en
+           from investigacion.intento it join public.caso c on c.id = it.caso_id
+           where it.participante = %s and it.estado = 'finalizado'
+           order by it.finalizado_en""",
+        (participante,),
+    )).fetchall()

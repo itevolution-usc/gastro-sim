@@ -5,6 +5,7 @@ Responsable: Diego Agudelo · RF-05, RF-07, RF-09 a RF-12.
   POST /intentos                        empieza a resolver un caso (o repite uno: RF-02.3)
   GET  /intentos                        fase 6: historial del estudiante (RF-02.3)
   GET  /mi-progreso                     fase 6: nivel, puntos e insignias (RF-11, W06)
+  GET  /mi-desempeno                    fase 7: tablero de desempeño (RF-13, W16)
   GET  /intentos/{id}                   estado actual (lo que el estudiante puede ver)
   POST /intentos/{id}/eventos           telemetría de la escena 3D (lotes)
   POST /intentos/{id}/decision-inicial  decisión + confianza → recomendación de la IA
@@ -131,6 +132,12 @@ async def historial(limite: int = Query(default=20, ge=1, le=100), usuario: Usua
 async def mi_progreso(usuario: Usuario = Depends(usuario_con_2fa),
                       servicio: ServicioIntentos = Depends(obtener_servicio)):
     return await _ejecutar(servicio.progreso(usuario.id))
+
+
+@router.get("/mi-desempeno")
+async def mi_desempeno(usuario: Usuario = Depends(usuario_con_2fa),
+                       servicio: ServicioIntentos = Depends(obtener_servicio)):
+    return await _ejecutar(servicio.desempeno(usuario.id))
 
 
 @router.get("/intentos/{intento_id}")
