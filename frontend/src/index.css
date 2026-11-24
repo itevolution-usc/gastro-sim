@@ -181,3 +181,56 @@ legend { font-weight: 700; padding: 0 6px; }
 .eventos-demo { font-size: 13px; padding-left: 20px; max-height: 180px; overflow: auto; }
 .titulo-mapa { display: flex; align-items: baseline; justify-content: space-between; }
 .titulo-mapa h2 { margin: 0 0 6px; }
+
+/* ---------- Fase 6: inicio con progreso e historial (W06), docente (W18 y W19) ---------- */
+.inicio { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.progreso, .panel { border: 1px solid var(--linea); border-radius: 10px; padding: 14px 16px; align-self: start; }
+.progreso h2, .historial h2, .accesos-docente h2, .panel h2, .detalle-caso h2, .detalle-caso h3 { font-size: 15px; margin: 0 0 8px; }
+.nivel-actual { margin: 0 0 8px; }
+.insignias { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.insignias li { border: 1px solid var(--linea); border-radius: 999px; padding: 4px 10px; font-size: 13px; }
+.insignias .obtenida { border-color: var(--marca); background: var(--info-fondo); font-weight: 600; }
+.insignias .pendiente { color: var(--suave); }
+.accesos-docente { display: grid; gap: 4px; border-top: 1px solid var(--linea); padding-top: 12px; margin: 12px 0 0; }
+.historial { border-top: 1px solid var(--linea); margin-top: 16px; padding-top: 16px; }
+.tabla-desplazable { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--linea); white-space: nowrap; }
+th { color: var(--suave); font-weight: 600; }
+td.bien { color: var(--marca); font-weight: 600; }
+td.mal { color: var(--error); font-weight: 600; }
+.cerrar-sesion { width: auto; display: block; margin: 16px 0 0 auto; padding: 8px 16px; }
+
+.nav-docente { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--linea); font-size: 14px; }
+.nav-docente a { text-decoration: none; font-weight: 600; }
+.nav-docente a.activo { text-decoration: underline; text-underline-offset: 6px; }
+.pestanas { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.pestanas button { background: transparent; color: var(--marca); padding: 7px 12px; font-size: 14px; }
+.pestanas button.activa { background: var(--marca); color: var(--marca-texto); }
+.conteo { font-weight: 500; }
+.revision { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+.lista-casos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 70vh; overflow-y: auto; }
+.lista-casos button { width: 100%; text-align: left; background: transparent; color: var(--texto); border-color: var(--linea); font-size: 14px; font-weight: 500; padding: 8px 10px; display: grid; gap: 2px; }
+.lista-casos button small { color: var(--suave); font-weight: 400; }
+.lista-casos button.elegido { border-color: var(--marca); background: var(--info-fondo); }
+.detalle-caso { border: 1px solid var(--linea); border-radius: 10px; padding: 14px 16px; }
+.datos.ficha { font-size: 14px; align-content: start; }
+.datos.ficha dd { text-transform: none; font-weight: 500; }
+.reglas { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 2px; font-size: 14px; }
+.reglas .bien { color: var(--marca); }
+.reglas .mal { color: var(--error); font-weight: 600; }
+.acciones-revision { margin-top: 12px; }
+.botones { display: flex; gap: 8px; }
+.botones button { margin: 0; flex: 1; }
+.peligro { background: transparent; color: var(--error); border-color: var(--error); }
+.config-docente { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.config-docente .panel p { margin: 4px 0 8px; }
+.valor-porcentaje { font-size: 1.6rem; font-weight: 700; color: var(--marca); }
+input[type='range'] { width: 100%; accent-color: var(--marca); }
+.extremos { display: flex; justify-content: space-between; color: var(--suave); font-weight: 400; }
+.config-docente .casilla { margin: 4px 0; }
+
+@media (max-width: 760px) {
+  .inicio, .revision, .config-docente { grid-template-columns: minmax(0, 1fr); }
+  .lista-casos { max-height: 240px; }
+}

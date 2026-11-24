@@ -133,6 +133,66 @@ export interface RespuestaTutor {
   mensajes_restantes: number
 }
 
+// ---------- Fase 6: historial y progreso (W06), docente (W18 y W19) ----------
+/** Una fila del historial (RF-02.3). Nunca trae la respuesta del caso. */
+export interface ResumenIntento {
+  id: string
+  caso_id: string
+  estado: EstadoIntento
+  fecha: string
+  region: Region
+  dificultad: Dificultad
+  acierto: boolean | null // null mientras no haya terminado
+  puntaje: number | null
+  puede_repetir: boolean
+}
+
+export interface InsigniaProgreso extends Insignia {
+  obtenida: boolean
+}
+
+export interface Progreso {
+  puntos: number
+  nivel: number
+  nivel_maximo: number
+  puntos_por_nivel: number
+  puntos_siguiente_nivel: number | null // null en el nivel máximo
+  insignias: InsigniaProgreso[]
+}
+
+export type EstadoCaso = 'pendiente' | 'aprobado' | 'descartado'
+
+/** Lo que ve el docente al revisar (RF-14.6): aquí sí llega la respuesta y cómo se generó. */
+export interface CasoDocente {
+  id: string
+  estado: EstadoCaso
+  dificultad: Dificultad
+  region: Region
+  clase: string
+  clase_nombre: string
+  historia: Historia
+  imagen_url: string | null
+  licencia_imagen: string
+  ubicacion: Caso['ubicacion']
+  modelo_llm: string | null
+  version_prompt: string | null
+  semilla: number | null
+  validacion: { ok: boolean; reglas_aprobadas: string[]; fallo: { regla: string; motivo: string } | null } | null
+  tiempo_generacion_ms: number | null
+  motivo_descarte: string | null
+  creado_en: string
+  revisado_en: string | null
+}
+
+export type TipoAlteracion = 'clase_incorrecta' | 'confianza_alterada' | 'roi_desplazada'
+
+export interface ConfigAlteraciones {
+  porcentaje: number
+  tipos: TipoAlteracion[]
+  vigente_desde: string | null
+  por_defecto: boolean
+}
+
 /** Error con el mensaje en español que envía la API (formato problem+json). */
 export class ErrorApi extends Error {
   readonly status: number
@@ -142,7 +202,7 @@ export class ErrorApi extends Error {
   }
 }
 
-async function pedir<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
+async function solicitar(ruta: string, opciones: RequestInit = {}): Promise<Response> {
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
   let respuesta: Response
@@ -162,7 +222,11 @@ async function pedir<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
     const problema = await respuesta.json().catch(() => null)
     throw new ErrorApi(respuesta.status, problema?.detail ?? `Error ${respuesta.status}`)
   }
-  return respuesta.json() as Promise<T>
+  return respuesta
+}
+
+async function pedir<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
+  return (await solicitar(ruta, opciones)).json() as Promise<T>
 }
 
 export const api = {
@@ -203,4 +267,20 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ eventos }),
     }),
+  // Fase 6: historial, repetir (con iniciarIntento) y progreso del estudiante (W06)
+  misIntentos: (limite = 20) => pedir<ResumenIntento[]>(`/intentos?limite=${limite}`),
+  miProgreso: () => pedir<Progreso>('/mi-progreso'),
+  // Fase 6: docente · W18 revisión de casos
+  casosDocente: (estado: EstadoCaso) => pedir<CasoDocente[]>(`/docente/casos?estado=${estado}`),
+  resumenCasos: () => pedir<Record<EstadoCaso, number>>('/docente/casos/resumen'),
+  revisarCaso: (id: string, estado: 'aprobado' | 'descartado', motivo?: string) =>
+    pedir<{ id: string; estado: EstadoCaso }>(`/docente/casos/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ estado, motivo: motivo || null }),
+    }),
+  // Fase 6: docente · W19 configuración de errores y exportación
+  verAlteraciones: () => pedir<ConfigAlteraciones>('/docente/alteraciones'),
+  guardarAlteraciones: (porcentaje: number, tipos: TipoAlteracion[]) =>
+    pedir<ConfigAlteraciones>('/docente/alteraciones', { method: 'PUT', body: JSON.stringify({ porcentaje, tipos }) }),
+  exportarIntentos: async () => (await solicitar('/docente/exportacion')).blob(),
 }
