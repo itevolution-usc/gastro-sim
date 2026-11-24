@@ -218,6 +218,28 @@ Diseño: patrón **Observer** (figura P5). El motor 3D *emite* eventos en un bus
 
 **Pruebas:** 77 de la API (7 nuevas de la escena) y 32 del frontend (15 nuevas de la escena).
 
+### Fase 6: herramientas del docente, historial y progreso
+
+| Pantalla | Qué hace | Requisitos |
+|---|---|---|
+| **W06** Inicio | **Mi progreso** (nivel, puntos y barra al siguiente nivel, insignias ganadas y por descubrir) e **Historial de casos** con **Repetir** (o **Continuar** si quedó a medias). Un caso que el docente descartó ya no se puede repetir | RF-02.3, RF-11 |
+| **W18** Revisión de casos (`/docente/casos`) | Pestañas Pendientes, Aprobados y Descartados con su conteo. Por cada caso: imagen, etiqueta (la respuesta), hito 3D, modelo, versión de las instrucciones, semilla, tiempo de generación, las 4 reglas de la validación y la historia. **Aprobar** o **Descartar con motivo** | RF-14.6 |
+| **W19** Configuración y exportación (`/docente/configuracion`) | Porcentaje de intentos con la IA alterada (0 a 50 %), tipos de alteración y **Descargar CSV** de los intentos, seudonimizado | RF-08.1, RF-08.2, RF-15 |
+
+Solo las cuentas con rol `docente` o `admin` ven los accesos a W18 y W19; la API también lo exige (403). Para probar, cambie el rol en la base local:
+`docker compose exec db psql -U gastro -d gastro_sim -c "update public.perfil set rol = 'docente' where nombre_visible = 'SU_USUARIO';"`
+
+| Ruta nueva | Quién | Requisito |
+|---|---|---|
+| `GET /intentos` | Estudiante (sus intentos) | RF-02.3 |
+| `GET /mi-progreso` | Estudiante | RF-11 |
+| `GET /docente/casos/resumen` | Docente | RF-14.6 |
+| `GET /docente/exportacion` | Docente | RF-15 |
+
+**El CSV** (`gastro-sim-intentos-AAAA-MM-DD.csv`) trae una fila por intento terminado: `participante` (seudónimo), `caso_id`, `dificultad`, `referencia`, `alterada`, `tipo_alteracion`, decisiones y confianza (inicial y final), `cambio_decision`, aciertos del estudiante y de la IA, `puntaje`, `duracion_s`, `hitos_visitados`, `mensajes_tutor` y `fecha`. Los sí/no van como 1/0. **No incluye nombres, correos ni el id de la cuenta** (RNF-08).
+
+**Pruebas:** 88 de la API (11 nuevas) y 42 del frontend (10 nuevas).
+
 ### Estructura del código
 
 | Carpeta | Contenido | Responsable |
@@ -225,7 +247,7 @@ Diseño: patrón **Observer** (figura P5). El motor 3D *emite* eventos en un bus
 | `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
 | `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
 | `api/app/seguridad.py`, `api/app/auth_admin.py`, `api/app/routers/cuentas.py` | Sesión, 2FA y códigos de recuperación (fase 2) | Diego Agudelo |
-| `frontend/` | Aplicación web (React): pantallas W01 a W11, W13 y W14 | Cristian Cruz |
+| `frontend/` | Aplicación web (React): pantallas W01 a W11, W13, W14, W18 y W19 | Cristian Cruz |
 | `frontend/src/escena/`, `frontend/public/modelos/` | Simulador 3D: motor three.js, bus de eventos, telemetría y modelo de Blender (fase 5) | Cristian Cruz |
 | `db/verificaciones/` | Verificación del esquema en Supabase | Jahan Chará |
 | `api/tests/`, `.github/workflows/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas, integración continua y empaquetado | Nestor Velasco |
@@ -235,6 +257,8 @@ Diseño: patrón **Observer** (figura P5). El motor 3D *emite* eventos en un bus
 | `api/app/intentos/puntaje.py` | Puntaje, niveles e insignias (fase 4) | Jahan Chará |
 | `api/app/intentos/`, `api/app/routers/intentos.py` | Intentos, recomendación de la IA y telemetría (fase 4) | Diego Agudelo |
 | Validación de hitos y `hitos_visitados` en `api/app/intentos/` y `routers/intentos.py` | Registro de hitos de la escena 3D (fase 5) | Jahan Chará |
+| `api/app/intentos/exportacion.py`, historial y progreso en `api/app/intentos/`, resumen y exportación del docente | Historial, progreso y exportación a CSV (fase 6) | Jahan Chará |
+| `frontend/src/paginas/Docente*.tsx`, `frontend/src/estado/docente.ts` y `progreso.ts`, `Inicio.tsx` | Pantallas W18, W19 y W06 con historial y progreso (fase 6) | Cristian Cruz |
 
 ### Problemas frecuentes
 
