@@ -20,8 +20,16 @@ export function porcentaje(fraccion: number): string {
   return `${Math.round(Math.min(1, Math.max(0, fraccion)) * 100)} %`
 }
 
-/** Qué pantalla corresponde a cada estado del intento (W10, W11 o W14). */
-export function pantallaDe(estado: EstadoIntento): 'decision_inicial' | 'recomendacion' | 'retroalimentacion' | 'cerrado' {
+/**
+ * Qué pantalla corresponde a cada estado del intento.
+ * Fase 5: "explorando" abre el simulador 3D (W09). Si el estudiante no encuentra el hallazgo
+ * y decide con la imagen, la página pasa `omitido = true` y se muestra la decisión inicial (W10).
+ */
+export function pantallaDe(
+  estado: EstadoIntento,
+  omitido = false,
+): 'exploracion' | 'decision_inicial' | 'recomendacion' | 'retroalimentacion' | 'cerrado' {
+  if (estado === 'explorando' && !omitido) return 'exploracion'
   if (estado === 'recomendacion') return 'recomendacion'
   if (estado === 'finalizado') return 'retroalimentacion'
   if (estado === 'abandonado') return 'cerrado'

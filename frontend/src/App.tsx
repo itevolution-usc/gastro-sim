@@ -1,6 +1,7 @@
 // Responsable: Cristian Cruz · Rutas de la aplicación
 // Cada pantalla de cuenta está protegida por el flujo: el usuario solo ve la
 // que le corresponde según su sesión, su aviso y su 2FA.
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 
 import { Marco } from './componentes/Marco'
@@ -16,7 +17,19 @@ import { Recuperar } from './paginas/Recuperar'
 import { Registro } from './paginas/Registro'
 import { Verificar2FA } from './paginas/Verificar2FA'
 
+// Fase 5: demo del simulador 3D solo en desarrollo (npm run dev → http://localhost:5173/demo-3d).
+const DemoEscena = import.meta.env.DEV
+  ? lazy(() => import('./paginas/DemoEscena').then((m) => ({ default: m.DemoEscena })))
+  : () => null
+
 export default function App() {
+  if (import.meta.env.DEV && window.location.pathname === '/demo-3d') {
+    return (
+      <Suspense fallback={<p className="cargando">Cargando demo…</p>}>
+        <DemoEscena />
+      </Suspense>
+    )
+  }
   if (faltantes.length) {
     return (
       <Marco codigo="CONFIG" titulo="Falta configurar el frontend">

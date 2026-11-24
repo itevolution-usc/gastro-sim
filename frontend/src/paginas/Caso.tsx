@@ -1,7 +1,7 @@
 // Responsable: Cristian Cruz · W10 Presentación del caso clínico (RF-04)
 // Muestra la historia sintética y la imagen. Nunca muestra la respuesta: la API no la envía.
 // Fase 4: el botón "Resolver este caso" abre un intento (decisiones, IA y tutor).
-// La exploración 3D (RF-03) se agrega cuando esté la escena.
+// Fase 5: al resolver, el estudiante primero recorre el tracto en el simulador 3D (W09).
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
@@ -68,8 +68,8 @@ export function Caso() {
       </div>
 
       <Mensaje tipo="info">
-        Zona a explorar: <strong>{caso.ubicacion.hito_nombre}</strong>. La exploración 3D llega con la escena del
-        endoscopio.
+        Zona a explorar: <strong>{caso.ubicacion.hito_nombre}</strong>. Al resolver, recorrerás el tracto con el
+        endoscopio virtual y capturarás el hallazgo.
       </Mensaje>
       <Mensaje tipo="info">Caso sintético generado por IA con fines académicos.</Mensaje>
       {error && <Mensaje tipo="error">{error}</Mensaje>}

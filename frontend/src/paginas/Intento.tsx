@@ -1,13 +1,18 @@
-// Responsable: Cristian Cruz · Resolver un caso: W10 decisión inicial, W11 recomendación y tutor,
-// W13 tutor no disponible (aviso dentro del chat) y W14 retroalimentación.
+// Responsable: Cristian Cruz · Resolver un caso: W09 simulador 3D (fase 5), W10 decisión inicial,
+// W11 recomendación y tutor, W13 tutor no disponible (aviso dentro del chat) y W14 retroalimentación.
 // La pantalla cambia según el estado que devuelve la API; la respuesta correcta solo llega al final.
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { ChatTutor } from '../componentes/ChatTutor'
 import { FormDecision } from '../componentes/FormDecision'
 import { HistoriaCaso, ImagenCaso } from '../componentes/CasoClinico'
 import { Marco, Mensaje } from '../componentes/Marco'
+import type { BusEscena } from '../escena/bus'
+import { TelemetriaBuffer } from '../escena/telemetria'
+
+// RNF-02: three.js pesa ~700 KB; se descarga solo al abrir el simulador, no al iniciar sesión.
+const Escena3D = lazy(() => import('../componentes/Escena3D').then((m) => ({ default: m.Escena3D })))
 import { etiquetaDificultad, etiquetaRegion, resumenPaciente } from '../estado/caso'
 import { etiquetaAlteracion, etiquetaConfianza, mensajeErrorIntento, pantallaDe, porcentaje } from '../estado/intento'
 import { api, ErrorApi, type Caso, type Intento as TipoIntento, type MensajeTutor } from '../servicios/api'
@@ -20,6 +25,9 @@ export function Intento() {
   const [error, setError] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
   const repitiendo = useRef(false)
+  // Fase 5: telemetría de la escena 3D (RF-12) y "decidir con la imagen" si no encuentra el hallazgo.
+  const telemetria = useRef<TelemetriaBuffer | null>(null)
+  const [omitido, setOmitido] = useState(false)
 
   const fallar = useCallback((e: unknown) => {
     setError(e instanceof ErrorApi ? mensajeErrorIntento(e.status, e.message) : 'Error inesperado')
@@ -41,6 +49,42 @@ export function Intento() {
       vigente = false
     }
   }, [id, fallar])
+
+  // Cada 3 s se envía lo que juntó la escena; al salir de la página, lo que quede.
+  useEffect(() => {
+    if (!id) return
+    const buffer = new TelemetriaBuffer((eventos) => api.registrarEventos(id, eventos))
+    telemetria.current = buffer
+    const enviar = () => buffer.enviarLote().catch(() => undefined) // si falla, se reintenta en el siguiente envío
+    const reloj = window.setInterval(enviar, 3000)
+    return () => {
+      window.clearInterval(reloj)
+      void enviar()
+      telemetria.current = null
+    }
+  }, [id])
+
+  const conectarBus = useCallback((bus: BusEscena) => {
+    bus.suscribir('*', (e) => telemetria.current?.agregar(e))
+  }, [])
+
+  /** Hallazgo capturado: se envía la telemetría y se recarga el intento (estado "hallazgo_capturado"). */
+  async function alCapturar() {
+    setOcupado(true)
+    try {
+      await telemetria.current?.enviarLote()
+      setIntento(await api.verIntento(id))
+    } catch (e) {
+      fallar(e)
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  function alOmitir() {
+    void telemetria.current?.enviarLote().catch(() => undefined)
+    setOmitido(true)
+  }
 
   async function accion(hacer: () => Promise<TipoIntento>) {
     setOcupado(true)
@@ -98,7 +142,7 @@ export function Intento() {
     )
   }
 
-  const pantalla = pantallaDe(intento.estado)
+  const pantalla = pantallaDe(intento.estado, omitido)
   const subtitulo = `${etiquetaDificultad(caso.dificultad)} · ${etiquetaRegion(caso.region)}`
 
   if (pantalla === 'retroalimentacion' && intento.retroalimentacion) {
@@ -221,6 +265,30 @@ export function Intento() {
     )
   }
 
+  // W09: el estudiante recorre el tracto en 3D y captura el hallazgo (RF-03).
+  if (pantalla === 'exploracion') {
+    return (
+      <Marco codigo="W09" titulo="Simulador 3D" subtitulo={`${subtitulo} · Busca el hallazgo y captúralo`} ancho>
+        <Suspense fallback={<p className="cargando-escena">Preparando el simulador 3D…</p>}>
+          <Escena3D
+          hallazgo={caso.ubicacion}
+          etiqueta={subtitulo}
+          zona={caso.ubicacion.hito_nombre}
+          visitadosPrevios={intento.hitos_visitados ?? []}
+          onBus={conectarBus}
+          onCapturado={alCapturar}
+          onOmitir={alOmitir}
+          />
+        </Suspense>
+        {error && <Mensaje tipo="error">{error}</Mensaje>}
+        <details className="historia-plegada">
+          <summary>Ver la historia clínica</summary>
+          <HistoriaCaso caso={caso} />
+        </details>
+      </Marco>
+    )
+  }
+
   // W10: el estudiante revisa imagen e historia y toma su decisión inicial (RF-05).
   return (
     <Marco codigo="W10" titulo={resumenPaciente(caso.historia)} subtitulo={subtitulo} ancho>
@@ -229,7 +297,16 @@ export function Intento() {
         <HistoriaCaso caso={caso} />
       </div>
       <Mensaje tipo="info">
-        Zona a explorar: <strong>{caso.ubicacion.hito_nombre}</strong>. Decide antes de ver la recomendación de la IA.
+        {intento.estado === 'explorando' ? (
+          <>
+            Decides con la imagen, sin captura 3D. Zona del caso: <strong>{caso.ubicacion.hito_nombre}</strong>.
+          </>
+        ) : (
+          <>
+            ✓ Hallazgo capturado en <strong>{caso.ubicacion.hito_nombre}</strong>. Esta es la imagen de la captura.
+          </>
+        )}{' '}
+        Decide antes de ver la recomendación de la IA.
       </Mensaje>
       <FormDecision
         titulo="¿Qué hallazgo ves?"
