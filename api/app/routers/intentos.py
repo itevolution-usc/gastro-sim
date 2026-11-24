@@ -2,7 +2,9 @@
 Rutas para resolver un caso (capa de interfaz: solo traduce HTTP ↔ servicio).
 Responsable: Diego Agudelo · RF-05, RF-07, RF-09 a RF-12.
 
-  POST /intentos                        empieza a resolver un caso
+  POST /intentos                        empieza a resolver un caso (o repite uno: RF-02.3)
+  GET  /intentos                        fase 6: historial del estudiante (RF-02.3)
+  GET  /mi-progreso                     fase 6: nivel, puntos e insignias (RF-11, W06)
   GET  /intentos/{id}                   estado actual (lo que el estudiante puede ver)
   POST /intentos/{id}/eventos           telemetría de la escena 3D (lotes)
   POST /intentos/{id}/decision-inicial  decisión + confianza → recomendación de la IA
@@ -17,7 +19,7 @@ from functools import lru_cache
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..alteraciones.estrategias import ServicioAlteraciones
@@ -117,6 +119,18 @@ async def iniciar(entrada: NuevoIntento, usuario: Usuario = Depends(usuario_con_
         return await servicio.iniciar(usuario.id, entrada.caso_id)
     except NoEncontrado:
         raise HTTPException(404, "El caso no existe o fue descartado")
+
+
+@router.get("/intentos")
+async def historial(limite: int = Query(default=20, ge=1, le=100), usuario: Usuario = Depends(usuario_con_2fa),
+                    servicio: ServicioIntentos = Depends(obtener_servicio)):
+    return await _ejecutar(servicio.historial(usuario.id, limite))
+
+
+@router.get("/mi-progreso")
+async def mi_progreso(usuario: Usuario = Depends(usuario_con_2fa),
+                      servicio: ServicioIntentos = Depends(obtener_servicio)):
+    return await _ejecutar(servicio.progreso(usuario.id))
 
 
 @router.get("/intentos/{intento_id}")

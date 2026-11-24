@@ -116,6 +116,7 @@ class ServicioCasos:
                 "clase_nombre": f["clase_nombre"],
                 "historia": f["historia"],
                 "imagen_url": await self._url(f["ruta_storage"]),
+                "licencia_imagen": f"HyperKvasir · {f['licencia']}",  # fase 6: la muestra el W18
                 "ubicacion": self._ubicacion(f),
                 "modelo_llm": f["modelo_llm"],
                 "version_prompt": f["version_prompt"],

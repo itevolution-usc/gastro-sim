@@ -185,3 +185,44 @@ async def otorgar(conexion, perfil_id: UUID, codigos: list[str]) -> None:
                select %s, id from public.insignia where codigo = %s on conflict do nothing""",
             (perfil_id, codigo),
         )
+
+
+# ---------- Fase 6: historial (RF-02.3) y exportación (RF-15) ----------
+
+async def mis_intentos(conexion, participante: UUID, limite: int) -> list[dict]:
+    """Intentos del estudiante, del más reciente al más antiguo. No incluye la respuesta del caso."""
+    return await (await conexion.execute(
+        """select it.id, it.caso_id, it.estado, it.acierto_usuario, it.puntaje, it.iniciado_en,
+                  c.dificultad, c.estado as estado_caso, ch.region
+           from investigacion.intento it
+           join public.caso c on c.id = it.caso_id
+           join public.clase_hallazgo ch on ch.id = c.referencia_id
+           where it.participante = %s
+           order by it.iniciado_en desc, it.id
+           limit %s""",
+        (participante, limite),
+    )).fetchall()
+
+
+async def filas_exportacion(conexion) -> list[dict]:
+    """RF-15: intentos finalizados, solo con el seudónimo (sin id de cuenta, nombre ni correo)."""
+    return await (await conexion.execute(
+        """select it.participante, it.caso_id, c.dificultad, ref.codigo as referencia,
+                  it.alterada, it.tipo_alteracion,
+                  di.codigo as decision_inicial, it.confianza_inicial,
+                  df.codigo as decision_final, it.confianza_final, it.cambio_decision,
+                  it.acierto_usuario, it.acierto_ia, it.puntaje,
+                  extract(epoch from (it.finalizado_en - it.iniciado_en))::int as duracion_s,
+                  (select count(distinct e.datos->>'hito') from investigacion.evento_telemetria e
+                    where e.intento_id = it.id and e.tipo = 'hito_visitado') as hitos_visitados,
+                  (select count(*) from investigacion.mensaje_tutor m
+                    where m.intento_id = it.id and m.emisor = 'estudiante') as mensajes_tutor,
+                  it.iniciado_en::date as fecha
+           from investigacion.intento it
+           join public.caso c on c.id = it.caso_id
+           join public.clase_hallazgo ref on ref.id = c.referencia_id
+           left join public.clase_hallazgo di on di.id = it.decision_inicial_id
+           left join public.clase_hallazgo df on df.id = it.decision_final_id
+           where it.estado = 'finalizado'
+           order by it.finalizado_en, it.id""",
+    )).fetchall()

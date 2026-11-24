@@ -111,3 +111,10 @@ async def revisar_caso(conexion, caso_id: UUID, estado: str, motivo: str | None,
     )
     return cursor.rowcount == 1
 
+
+async def contar_por_estado(conexion) -> dict[str, int]:
+    """Fase 6 (W18): cuántos casos hay en cada pestaña de la bandeja del docente."""
+    filas = await (await conexion.execute("select estado::text, count(*) as n from public.caso group by estado")).fetchall()
+    conteo = {"pendiente": 0, "aprobado": 0, "descartado": 0}
+    conteo.update({f["estado"]: f["n"] for f in filas})
+    return conteo
