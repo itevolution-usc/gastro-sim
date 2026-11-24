@@ -6,10 +6,15 @@ Cada estado sabe qué acciones permite. Si el estudiante intenta algo fuera
 de orden (pedir el tutor antes de decidir, decidir dos veces...), el estado
 lanza TransicionInvalida y la API responde 409.
 
-Mientras no exista la escena 3D (Cristian), la decisión inicial se permite
-desde "explorando": el estudiante revisa la imagen y la historia y decide.
+Fase 5: el estudiante recorre la escena 3D y captura el hallazgo (pasa a
+"hallazgo_capturado"). Si no lo encuentra, puede decidir con la imagen desde
+"explorando"; la telemetría guarda que lo omitió (hallazgo_omitido).
 """
 from abc import ABC
+
+
+# Los 7 hitos anatómicos, en el orden del recorrido (iguales a hito_anatomico y al modelo 3D).
+HITOS = ("linea_z", "cardias", "fondo", "cuerpo", "antro", "piloro", "bulbo")
 
 
 class TransicionInvalida(Exception):

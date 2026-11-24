@@ -137,5 +137,8 @@ class ServicioCasos:
 
     @staticmethod
     def _ubicacion(fila: dict) -> dict:
+        # Fase 5 (RF-03.4): la escena 3D pinta una lesión solo si el hallazgo es patológico; un caso
+        # normal (línea Z, píloro o retroflexión) no muestra lesión. La clase sigue sin enviarse.
         return {"hito": fila["hito"], "hito_nombre": fila["hito_nombre"], "x": fila["x"], "y": fila["y"],
-                "z": fila["z"], "radio_visibilidad": fila["radio_visibilidad"]}
+                "z": fila["z"], "radio_visibilidad": fila["radio_visibilidad"],
+                "lesion_visible": fila["es_patologico"]}

@@ -15,7 +15,7 @@ _COLUMNAS_CASO = """
   c.id, c.dificultad, c.historia, c.estado, c.creado_en, c.modelo_llm, c.version_prompt,
   c.semilla, c.validacion, c.tiempo_generacion_ms, c.motivo_descarte, c.revisado_en,
   i.ruta_storage, i.archivo_origen, i.licencia,
-  ch.codigo as clase, ch.nombre_es as clase_nombre, ch.region,
+  ch.codigo as clase, ch.nombre_es as clase_nombre, ch.region, ch.es_patologico,
   u.x, u.y, u.z, u.radio_visibilidad, h.codigo as hito, h.nombre as hito_nombre
 """
 _DESDE_CASO = """
