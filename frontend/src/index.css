@@ -132,3 +132,52 @@ legend { font-weight: 700; padding: 0 6px; }
 .puntaje span { border: 1px solid var(--linea); border-radius: 8px; padding: 6px 10px; font-size: 14px; }
 .puntaje .total { border-color: var(--marca); }
 @media (max-width: 520px) { .escala small { display: none; } }
+
+/* ---------- Fase 5: W09 simulador 3D (RF-03.1 a RF-03.6) ---------- */
+.simulador { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 16px; margin-bottom: 12px; }
+@media (max-width: 760px) { .simulador { grid-template-columns: 1fr; } }
+.escena { position: relative; aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: #050202; color: #f3eceb; }
+.lienzo-3d { position: absolute; inset: 0; touch-action: none; cursor: grab; outline: none; }
+.lienzo-3d:active { cursor: grabbing; }
+.lienzo-3d:focus-visible { box-shadow: inset 0 0 0 3px var(--marca); }
+.lienzo-3d canvas { display: block; width: 100%; height: 100%; }
+.hud { position: absolute; background: rgb(10 12 14 / 0.72); border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; }
+.hud.arriba-izq { top: 10px; left: 10px; display: grid; gap: 2px; }
+.hud.abajo-izq { bottom: 10px; left: 10px; font-size: 12px; }
+.hud.etiqueta-hallazgo { top: calc(50% + 62px); left: 50%; transform: translateX(-50%); color: #ffd6a0; }
+.hud.aviso { top: 10px; right: 10px; background: rgb(120 20 16 / 0.85); }
+.mira { position: absolute; top: 50%; left: 50%; width: 110px; height: 110px; margin: -55px 0 0 -55px; border: 2px solid rgb(122 176 230 / 0.75); border-radius: 50%; pointer-events: none; }
+.mira::before, .mira::after { content: ''; position: absolute; background: rgb(122 176 230 / 0.75); }
+.mira::before { left: 50%; top: 30%; width: 2px; height: 40%; margin-left: -1px; }
+.mira::after { top: 50%; left: 30%; height: 2px; width: 40%; margin-top: -1px; }
+.mira.en-vista { border-color: #ffb14a; box-shadow: 0 0 18px rgb(255 177 74 / 0.6); }
+.capturar { position: absolute; right: 10px; bottom: 10px; width: auto; background: #0a8a43; border-color: #0a8a43; color: #fff; }
+.mandos { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; }
+.mandos button { width: auto; margin: 0; padding: 8px 10px; font-size: 13px; background: rgb(10 12 14 / 0.72); color: #f3eceb; border-color: rgb(255 255 255 / 0.25); touch-action: none; user-select: none; }
+@media (hover: hover) and (pointer: fine) { .mandos { display: none; } }
+@media (max-width: 520px) { .hud.abajo-izq { display: none; } }
+.velo { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; text-align: center; padding: 16px; background: rgb(5 2 2 / 0.88); }
+.velo .primario { width: auto; }
+.panel-escena { display: grid; align-content: start; gap: 14px; }
+.panel-escena h2 { font-size: 14px; margin: 0 0 6px; }
+.minimapa { width: 100%; height: auto; background: var(--info-fondo); border-radius: 10px; }
+.minimapa-ruta { fill: none; stroke: var(--linea); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.minimapa-hito { fill: var(--tarjeta); stroke: var(--suave); stroke-width: 2; }
+.minimapa-hito.visitado { fill: var(--marca); stroke: var(--marca); }
+.minimapa-hito.objetivo { stroke: #e0662b; stroke-width: 3; }
+.minimapa-yo { fill: #e0662b; stroke: #fff; stroke-width: 2; }
+.leyenda { display: flex; align-items: center; gap: 4px; font-size: 12px; margin: 4px 0 0; }
+.punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.punto.yo { background: #e0662b; }
+.punto.objetivo { border: 2px solid #e0662b; }
+.hitos { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 14px; }
+.hitos li { color: var(--suave); }
+.hitos li.visitado { color: var(--texto); font-weight: 600; }
+.hitos li.visitado span[aria-hidden] { color: var(--marca); }
+.omitir { grid-column: 1 / -1; justify-self: start; }
+.cargando-escena { aspect-ratio: 16 / 10; display: grid; place-content: center; background: #050202; color: #f3eceb; border-radius: 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.titulo-eventos { font-size: 14px; margin: 12px 0 4px; }
+.eventos-demo { font-size: 13px; padding-left: 20px; max-height: 180px; overflow: auto; }
+.titulo-mapa { display: flex; align-items: baseline; justify-content: space-between; }
+.titulo-mapa h2 { margin: 0 0 6px; }

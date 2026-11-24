@@ -36,7 +36,16 @@ export interface Caso {
   region: Region
   historia: Historia
   imagen_url: string | null
-  ubicacion: { hito: string; hito_nombre: string; x: number; y: number; z: number; radio_visibilidad: number }
+  ubicacion: {
+    hito: string
+    hito_nombre: string
+    x: number
+    y: number
+    z: number
+    radio_visibilidad: number
+    /** Fase 5 (RF-03.4): false en hallazgos normales; la escena no pinta lesión. */
+    lesion_visible?: boolean
+  }
   licencia_imagen: string
   creado_en: string
 }
@@ -95,6 +104,13 @@ export interface Retroalimentacion {
   insignias_nuevas: Insignia[]
 }
 
+/** Evento de la escena 3D (RF-12). Lo arma el bus de la escena (escena/bus.ts). */
+export interface EventoTelemetria {
+  tipo: 'hito_visitado' | 'hallazgo_capturado' | 'hallazgo_omitido' | 'captura_invalida' | 'pausa' | 'reanudacion'
+  datos: Record<string, string | number | boolean>
+  ocurrido_en: string
+}
+
 export interface Intento {
   id: string
   caso_id: string
@@ -107,6 +123,8 @@ export interface Intento {
   mensajes_restantes: number
   decision_final: DecisionTomada | null
   retroalimentacion: Retroalimentacion | null // solo al final: aquí llega la respuesta correcta
+  /** Fase 5: códigos de los hitos ya visitados en la escena 3D (para retomar tras recargar). */
+  hitos_visitados?: string[]
 }
 
 export interface RespuestaTutor {
@@ -178,5 +196,11 @@ export const api = {
     pedir<Intento>(`/intentos/${encodeURIComponent(id)}/decision-final`, {
       method: 'POST',
       body: JSON.stringify({ clase, confianza }),
+    }),
+  // Fase 5: telemetría de la escena 3D, en lotes de hasta 200 eventos (RF-12)
+  registrarEventos: (id: string, eventos: EventoTelemetria[]) =>
+    pedir<{ registrados: number }>(`/intentos/${encodeURIComponent(id)}/eventos`, {
+      method: 'POST',
+      body: JSON.stringify({ eventos }),
     }),
 }

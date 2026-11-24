@@ -5,7 +5,8 @@ import { estiloRoi, etiquetaAlteracion, etiquetaConfianza, mensajeErrorIntento, 
 
 describe('intento', () => {
   it('elige la pantalla según el estado', () => {
-    expect(pantallaDe('explorando')).toBe('decision_inicial')
+    expect(pantallaDe('explorando')).toBe('exploracion')
+    expect(pantallaDe('explorando', true)).toBe('decision_inicial')
     expect(pantallaDe('hallazgo_capturado')).toBe('decision_inicial')
     expect(pantallaDe('recomendacion')).toBe('recomendacion')
     expect(pantallaDe('finalizado')).toBe('retroalimentacion')

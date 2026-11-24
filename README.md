@@ -201,6 +201,23 @@ Mientras se entrena el modelo de visión (actividad 4304), la recomendación la 
 
 **Pruebas:** 70 de la API (25 nuevas) y 17 del frontend. Ninguna prueba llama a Gemini.
 
+### Fase 5: escena 3D del tracto superior (simulador del endoscopio)
+
+Al resolver un caso, el estudiante primero **recorre el tracto en 3D** (W09) y luego decide (W10):
+
+1. **Modelo 3D** (`frontend/public/modelos/tracto_superior.glb`): hecho en Blender por Cristian. 1 unidad = 1 cm, 7 hitos con nombre y el punto `camara_inicio`. Pesa ~190 KB y tiene ~4.200 triángulos (RF-03.1, RNF-02).
+2. **Endoscopio virtual** (RF-03.2): **W/S** avanzar y retroceder por la ruta de los hitos, **A/D** girar, **arrastrar con el mouse** para orientar la punta (incluida la retroflexión), **Q/E** rotar. En celular y tableta hay botones en pantalla.
+3. **Registro de hitos** (RF-03.3) y **minimapa** (RF-03.6): cada hito se marca al pasar a menos de 2,5 cm y se muestra el % visitado. El minimapa se puede ocultar. Recorrer los 7 da la insignia **Explorador**.
+4. **Hallazgo en su punto 3D** (RF-03.4): la mancha se pinta en la pared más cercana a la ubicación del caso (`ubicacion_3d`). Se ve **igual para todas las clases patológicas**; un hallazgo **normal** (línea Z, píloro o retroflexión) no muestra lesión, como pide RF-03.4. La clase nunca llega al navegador.
+5. **Captura** (RF-03.5): se puede capturar si el hallazgo está cerca y en el centro de la mira. Si no lo encuentra, puede **decidir con la imagen** (queda registrado como `hallazgo_omitido`).
+6. **Telemetría** (RF-12): hitos, capturas, capturas inválidas y pausas se envían en lotes cada 3 s a `POST /intentos/{id}/eventos`.
+
+Diseño: patrón **Observer** (figura P5). El motor 3D *emite* eventos en un bus; la lista de hitos, el minimapa y la telemetría *se suscriben*. three.js se descarga solo al abrir el simulador (RNF-02).
+
+**Probar la escena sin iniciar sesión** (solo en desarrollo): `npm run dev` y abrir <http://localhost:5173/demo-3d>. Opciones: `?zona=linea_z`, `?zona=cardias`, `?zona=piloro` y `&en=0.55,180,0` (saltar a un punto: avance 0–1, giro y inclinación en grados).
+
+**Pruebas:** 77 de la API (7 nuevas de la escena) y 32 del frontend (15 nuevas de la escena).
+
 ### Estructura del código
 
 | Carpeta | Contenido | Responsable |
@@ -208,7 +225,8 @@ Mientras se entrena el modelo de visión (actividad 4304), la recomendación la 
 | `db/migraciones/` | Esquema de la base de datos (se aplica solo al crear el contenedor) | Jahan Chará |
 | `api/app/` | API: configuración, conexión a la base de datos, errores y rutas | Diego Agudelo |
 | `api/app/seguridad.py`, `api/app/auth_admin.py`, `api/app/routers/cuentas.py` | Sesión, 2FA y códigos de recuperación (fase 2) | Diego Agudelo |
-| `frontend/` | Aplicación web (React): pantallas W01 a W08, W10, W11, W13 y W14 | Cristian Cruz |
+| `frontend/` | Aplicación web (React): pantallas W01 a W11, W13 y W14 | Cristian Cruz |
+| `frontend/src/escena/`, `frontend/public/modelos/` | Simulador 3D: motor three.js, bus de eventos, telemetría y modelo de Blender (fase 5) | Cristian Cruz |
 | `db/verificaciones/` | Verificación del esquema en Supabase | Jahan Chará |
 | `api/tests/`, `.github/workflows/`, `docker-compose.yml`, `api/Dockerfile` | Pruebas automáticas, integración continua y empaquetado | Nestor Velasco |
 | `api/app/casos/`, `api/app/llm.py`, `api/app/routers/casos.py` | Generador de casos con IA (fase 3) | Emmanuel Ospina |
@@ -216,6 +234,7 @@ Mientras se entrena el modelo de visión (actividad 4304), la recomendación la 
 | `api/app/alteraciones/`, `api/app/tutor/`, `api/app/routers/alteraciones.py` | Alteraciones de la IA y tutor socrático (fase 4) | Emmanuel Ospina |
 | `api/app/intentos/puntaje.py` | Puntaje, niveles e insignias (fase 4) | Jahan Chará |
 | `api/app/intentos/`, `api/app/routers/intentos.py` | Intentos, recomendación de la IA y telemetría (fase 4) | Diego Agudelo |
+| Validación de hitos y `hitos_visitados` en `api/app/intentos/` y `routers/intentos.py` | Registro de hitos de la escena 3D (fase 5) | Jahan Chará |
 
 ### Problemas frecuentes
 
